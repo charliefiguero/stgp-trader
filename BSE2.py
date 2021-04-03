@@ -58,23 +58,10 @@ import random
 from BSE2_exchange import Exchange
 from BSE2_trader_agents import trader_create
 from BSE2_customer_orders import customer_orders
+from BSE2_Entity import Entity
 
 # from BSE2_unittests import test_all
 # from BSE2_dev import proc_OXO proc_ICE
-
-
-class Entity:
-
-    def __init__(self, id, init_balance, init_reputation, traders):
-        self.lei = id  # LEI = legal entity identifier
-        self.balance = init_balance
-        self.reputation = init_reputation
-        self.traders = traders
-
-    def __str__(self):
-        s = '[%s $%d R=%d %s]' % (self.lei, self.balance, self.reputation, str(self.traders))
-        return s
-
 
 
 # #########################---Below lies the experiment/test-rig---##################
@@ -516,7 +503,7 @@ def market_session(session_id, starttime, endtime, entities, trader_spec, order_
 
 if __name__ == "__main__":
 
-    verbose = True
+    verbose = False
 
     start_time = 0.0
     end_time = 200.0
