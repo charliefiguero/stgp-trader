@@ -4,6 +4,7 @@ import inspect
 import random
 import operator
 import numpy
+import datetime
 
 from deap import gp, creator, base, tools, algorithms
 import pygraphviz as pgv
@@ -83,8 +84,12 @@ class STGP_Entity(Entity):
 
 
 if __name__ == "__main__":
+
+    # create tree
     e = STGP_Entity(0, 100)
     expr = e.fullgen_initial_pop(1)
+    print(expr)
+    print()
     nodes, edges, labels = gp.graph(expr)
 
     ### Graphviz Section ###
@@ -98,8 +103,17 @@ if __name__ == "__main__":
         n.attr["label"] = labels[i]
 
     # saves to tree.pdf
-    g.draw("trees/tree.pdf")
+    now = datetime.datetime.now()
+    print(now)
+    print()
+    g.draw(f"trees/tree {now}.pdf")
 
 
 
-    # TODO print output of tree
+    # TODO compile trees
+    output = gp.compile(expr, e.pset)
+    print(output)
+
+    # TODO why is the output a bool?
+    # TODO what is an automatically defined function?
+    # TODO what are the ARG1 in the tree?

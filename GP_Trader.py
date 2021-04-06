@@ -9,5 +9,6 @@ from BSE2_trader_agents import Trader
 
 class GP_Trader(Trader):
     
-    def __init__(self):
+    def __init__(self, tree):
         val = 1
+
