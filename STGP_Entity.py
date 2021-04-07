@@ -23,73 +23,48 @@ class STGP_Entity(Entity):
     def __init__(self, id, init_balance):
         super().__init__(id, init_balance, 0, {})
 
-        self.pset = self.create_primitive_set()
-        self.pop_size = 1
-        # self.traders.update(self.fullgen_initial_pop())
+        self.pset, self.toolbox = self.create_toolbox_and_pset()
 
+        self.pop_size = 1
         self.time_since_last_trader_eval = 0
 
-    def create_primitive_set(self):
-        """ Creates the primitive set for the STGP traders: the building blocks of the trees. Called once at init of STGP_Entity. """
-
-        pset = gp.PrimitiveSetTyped("main", [int, bool], int)
-
+    def create_toolbox_and_pset(self):
+        # initialise pset
+        pset = gp.PrimitiveSetTyped("main", [int], int)
+        pset.renameArguments(ARG0="int")
         # integer operations
         pset.addPrimitive(operator.add, [int, int], int)
         pset.addPrimitive(operator.sub, [int, int], int)
-
-        # boolean operations
-        # pset.addPrimitive(operator.and_, [bool, bool], bool)
-        # pset.addPrimitive(operator.or_, [bool, bool], bool)
-        # pset.addPrimitive(operator.xor, [bool, bool], bool)
-        # pset.addPrimitive(operator.not_, bool, bool)
-
         # conditional operations 
-        pset.addPrimitive(if_then_else, [bool, float, float], float)
+        pset.addPrimitive(if_then_else, [bool, int, int], int)
         pset.addPrimitive(operator.lt, [int, int], bool)
         pset.addPrimitive(operator.gt, [int, int], bool)
         pset.addPrimitive(operator.eq, [int, int], bool)
-
-        # basic terminals
-        # pset.addTerminal(1, bool)
-        # pset.addTerminal(0, bool)
-
+        # boolean terminals
+        pset.addTerminal(True, bool)
+        pset.addTerminal(False, bool)
         # ephemeral terminals
-        pset.addEphemeralConstant("integer", lambda: random.randint(-10, 10), int)
+        pset.addEphemeralConstant("qwer", lambda: random.randint(-10, 10), int)
 
-        # variables - enter these into the tree then replace them with references oncde the tree has been instantiated.
-        # eg. pset.addTerminal("orderbookdata", var)
-        # terminal orderbookdata = limitorderbook[0]
+        # create individual class
+        creator.create("Individual", gp.PrimitiveTree)
 
-        return pset
+        # create toolbox
+        toolbox = base.Toolbox()
+        toolbox.register("expr", gp.genFull, pset=pset, min_=1, max_=3)
+        toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
 
-    def convert_tree_variable_to_reference(self):
-        pass
-
-    def fullgen_initial_pop(self, size):
-        pop = gp.genFull(self.pset, 2, 3)
-        return pop
-
-    def evaluate_trader(self, trader):
-        """ evaluates the traders based on their profit over a given timeframe """
-        pass
-
-    def create_var_pop(self):
-        """ vary the population according to genetic programming. """
-        # deap/algorithms.py :: varOr()
-        pass
-
-    def evolve_traders(self):
-        pass
-
+        return pset, toolbox
+        
 
 if __name__ == "__main__":
 
     # create tree
     e = STGP_Entity(0, 100)
-    expr = e.fullgen_initial_pop(1)
-    print(expr)
-    print()
+    expr = e.toolbox.individual()
+    tree = gp.PrimitiveTree(expr)
+
+    print(tree)
     nodes, edges, labels = gp.graph(expr)
 
     ### Graphviz Section ###
@@ -104,16 +79,9 @@ if __name__ == "__main__":
 
     # saves to tree.pdf
     now = datetime.datetime.now()
-    print(now)
-    print()
+    print(f"Current time: {now}\n")
     g.draw(f"trees/tree {now}.pdf")
 
-
-
-    # TODO compile trees
-    output = gp.compile(expr, e.pset)
-    print(output)
-
-    # TODO why is the output a bool?
-    # TODO what is an automatically defined function?
-    # TODO what are the ARG1 in the tree?
+    output = gp.compile(tree, e.pset)
+    print(output(1))
+    
