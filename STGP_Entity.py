@@ -23,28 +23,28 @@ class STGP_Entity(Entity):
     def __init__(self, id, init_balance):
         super().__init__(id, init_balance, 0, {})
 
-        self.pset, self.toolbox = self.create_toolbox_and_pset()
+        self.pset, self.toolbox = self.create_deap_toolbox_and_pset()
 
         self.pop_size = 1
         self.time_since_last_trader_eval = 0
 
-    def create_toolbox_and_pset(self):
+    def create_deap_toolbox_and_pset(self):
         # initialise pset
-        pset = gp.PrimitiveSetTyped("main", [int], int)
-        pset.renameArguments(ARG0="int")
+        pset = gp.PrimitiveSetTyped("main", [float], float)
+        pset.renameArguments(ARG0="ema_ind")
         # integer operations
-        pset.addPrimitive(operator.add, [int, int], int)
-        pset.addPrimitive(operator.sub, [int, int], int)
+        pset.addPrimitive(operator.add, [float, float], float)
+        pset.addPrimitive(operator.sub, [float, float], float)
         # conditional operations 
-        pset.addPrimitive(if_then_else, [bool, int, int], int)
-        pset.addPrimitive(operator.lt, [int, int], bool)
-        pset.addPrimitive(operator.gt, [int, int], bool)
-        pset.addPrimitive(operator.eq, [int, int], bool)
+        pset.addPrimitive(if_then_else, [bool, float, float], float)
+        pset.addPrimitive(operator.lt, [float, float], bool)
+        pset.addPrimitive(operator.gt, [float, float], bool)
+        pset.addPrimitive(operator.eq, [float, float], bool)
         # boolean terminals
         pset.addTerminal(True, bool)
         pset.addTerminal(False, bool)
         # ephemeral terminals
-        pset.addEphemeralConstant("qwer", lambda: random.randint(-10, 10), int)
+        pset.addEphemeralConstant("qwer", lambda: random.randint(-10, 10), float)
 
         # create individual class
         creator.create("Individual", gp.PrimitiveTree)
@@ -84,4 +84,3 @@ if __name__ == "__main__":
 
     output = gp.compile(tree, e.pset)
     print(output(1))
-    
