@@ -79,7 +79,7 @@ class STGP_Entity(Entity):
 
         for count, expr in enumerate(self.exprs):
             trading_function = gp.compile(gp.PrimitiveTree(expr), self.pset)
-            self.traders.append(STGP_Trader(count, balance, time, trading_function))
+            self.traders[count] = STGP_Trader(count, balance, time, trading_function)
         
 
 if __name__ == "__main__":
@@ -87,6 +87,7 @@ if __name__ == "__main__":
     
     e = STGP_Entity(0, 100)
     e.init_traders(10, 100, datetime.datetime.now())
+    print(e.traders[0])
 
     # exprs = e.toolbox.population(10)
     # draw_expr(exprs[0])
@@ -95,7 +96,6 @@ if __name__ == "__main__":
     # function = gp.compile(a_tree, e.pset)
     # print(function(1))
 
-
-    # TODO create traders
-    # TODO initialise traders in STGP_Entity
+    # TODO complete STGP_Trader class
     # TODO register traders on the exchange
+    # TODO trader evaluation and evolution

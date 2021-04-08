@@ -10,7 +10,7 @@ from BSE2_trader_agents import Trader
 class STGP_Trader(Trader):
     
     def __init__(self, tid, balance, time, trading_func):
-        super.__init__("stgp_trader", tid, balance, time)
+        super().__init__("stgp_trader", tid, balance, time)
         self.trading_func = trading_func
 
     def getorder(self, time, countdown, lob, verbose):
@@ -22,7 +22,7 @@ class STGP_Trader(Trader):
     def ema_ind(self):
         """ exponential moving average indicator for the trader """
         ema = 1
-        return 1
+        return ema
     
 
 
