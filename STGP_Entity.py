@@ -87,7 +87,15 @@ if __name__ == "__main__":
     
     e = STGP_Entity(0, 100)
     e.init_traders(10, 100, datetime.datetime.now())
-    print(e.traders[0])
+
+    trader = e.traders[0]
+
+    order = Assignment("CUS", tname, 'Bid', 'LIM', 
+                       10, 1, 1, None, 1)
+    trader.add_cust_order()
+
+
+    print(e.traders[0].getorder(0, 0, [0], True))
 
     # exprs = e.toolbox.population(10)
     # draw_expr(exprs[0])

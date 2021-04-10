@@ -11,18 +11,52 @@ class STGP_Trader(Trader):
     
     def __init__(self, tid, balance, time, trading_func):
         super().__init__("stgp_trader", tid, balance, time)
+
+        # trading function from STGP tree (calculates improvement on customer order).
         self.trading_func = trading_func
 
+        # Exponential Moving Average
+        self.ema = None
+        self.nLastTrades = 5
+        self.ema_param = 2 / float(self.nLastTrades + 1)
+
     def getorder(self, time, countdown, lob, verbose):
-        pass
+        """ Called by the market session to get an order from this trader. """
+        if verbose:
+            print('STGP Trader getorder:')
+
+        if len(self.orders) < 1:
+            # no orders: return NULL
+            order = None
+        else:
+            self.limit = self.orders[0].price
+            self.job = self.orders[0].atype
+
+            if self.job == 'Bid':
+                # currently a buyer (working a bid order)
+                improvement = -self.trading_func(self.ema)
+            else:
+                # currently a seller (working a sell order)
+                improvement = self.trading_func(self.ema)
+
+            quoteprice = int(self.limit + improvement)
+            self.price = quoteprice
+
+            order = Order(self.tid, self.job, "LIM", quoteprice, 
+                          self.orders[0].qty, time, None, -1)
+
+            self.lastquote = order
+        return order
 
     def respond(self, time, lob, trade, verbose):
-        pass
+        """ Called by the market session when the LOB has updated. """
+        if (trade != None):
+            self.update_ema(trade["price"]) # update EMA
 
-    def ema_ind(self):
-        """ exponential moving average indicator for the trader """
-        ema = 1
-        return ema
+    def update_ema(self, price):
+        """ Update exponential moving average indicator for the trader. """
+        if self.ema == None: self.ema = price
+        else: self.ema = self.ema_param * price + (1 - self.ema_param) * self.ema
     
 
 
