@@ -25,6 +25,8 @@ class STGP_Trader(Trader):
         if verbose:
             print('STGP Trader getorder:')
 
+        print("hello")
+
         if len(self.orders) < 1:
             # no orders: return NULL
             order = None

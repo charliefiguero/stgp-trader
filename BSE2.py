@@ -255,14 +255,14 @@ def market_session(session_id, starttime, endtime, entities, trader_spec, order_
 
     tape_depth = 5  # number of most-recent items from tail of tape to be published at any one time
 
-    verbosity = True
+    verbosity = False
 
     verbose = verbosity  # main loop verbosity
     orders_verbose = verbosity
-    lob_verbose = True
-    process_verbose = True
-    respond_verbose = True
-    bookkeep_verbose = True
+    lob_verbose = False
+    process_verbose = False
+    respond_verbose = False
+    bookkeep_verbose = False
 
     price_fname = session_id + 'prices.csv'
     prices_data_file = open(price_fname, 'w')

@@ -3,3 +3,4 @@ __pycache__/
 trees/*.pdf
 .DS_Store
 .vscode/
+output.txt
