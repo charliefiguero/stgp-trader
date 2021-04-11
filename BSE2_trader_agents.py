@@ -667,4 +667,3 @@ def trader_create(lei, robottype, name):
 
     t.lei = lei
     return t
-

@@ -32,13 +32,17 @@ class STGP_Trader(Trader):
             self.limit = self.orders[0].price
             self.job = self.orders[0].atype
 
-            if self.job == 'Bid':
-                # currently a buyer (working a bid order)
-                improvement = -self.trading_func(self.ema)
-            else:
-                # currently a seller (working a sell order)
-                improvement = self.trading_func(self.ema)
+            # calculate improvement on customer order
+            if self.ema != None:
+                if self.job == 'Bid':
+                    # currently a buyer (working a bid order)
+                    improvement = -self.trading_func(self.ema)
+                else:
+                    # currently a seller (working a sell order)
+                    improvement = self.trading_func(self.ema)
 
+            if verbose:
+                print(f"improvement: {improvement}")
             quoteprice = int(self.limit + improvement)
             self.price = quoteprice
 
@@ -46,14 +50,16 @@ class STGP_Trader(Trader):
                           self.orders[0].qty, time, None, -1)
 
             self.lastquote = order
+
+            print(f"stgp trader making order with price: {quoteprice}")
         return order
 
     def respond(self, time, lob, trade, verbose):
-        """ Called by the market session when the LOB has updated. """
+        """ Called by the market session to notify trader of LOB updates. """
         if (trade != None):
-            self.update_ema(trade["price"]) # update EMA
+            self._update_ema(trade["price"]) # update EMA
 
-    def update_ema(self, price):
+    def _update_ema(self, price):
         """ Update exponential moving average indicator for the trader. """
         if self.ema == None: self.ema = price
         else: self.ema = self.ema_param * price + (1 - self.ema_param) * self.ema

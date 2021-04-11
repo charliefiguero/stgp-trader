@@ -56,9 +56,11 @@ import random
 
 # from BSE2_msg_classes import Assignment, Order, ExchMsg
 from BSE2_exchange import Exchange
-from BSE2_trader_agents import trader_create
 from BSE2_customer_orders import customer_orders
+from BSE2_trader_agents import trader_create
 from BSE2_Entity import Entity
+
+from STGP_Entity import STGP_Entity
 
 # from BSE2_unittests import test_all
 # from BSE2_dev import proc_OXO proc_ICE
@@ -100,7 +102,6 @@ def trade_stats(expid, traders, dumpfile, time, lob):
     else:
         dumpfile.write('N, ')
     dumpfile.write('\n')
-
 
 # create a bunch of traders from traders_specification, links them to the relevant entities
 # returns tuple (n_buyers, n_sellers)
@@ -294,6 +295,21 @@ def market_session(session_id, starttime, endtime, entities, trader_spec, order_
             entities[e].traders=[trader]
             traders[trader].lei = entities[e].lei
             e += 1
+
+
+    ########################################
+
+    # initialise stgp entity
+    stgp = STGP_Entity("stgp", 10000)
+    entities.append(stgp)
+
+    # intialise stgp traders
+    stgp.init_traders(10, 100000, 0)
+    traders.update(stgp.traders)
+
+    # TODO add traders to trader_stats
+
+    ########################################
 
     #show what we've got
     if verbose:
@@ -546,6 +562,11 @@ if __name__ == "__main__":
         if verbose:
             print(e)
 
+    # # Add STGP entity
+    # stgp_e = STGP_Entity(id="STGP_BOI", init_balance=100)
+    # print("stgp_e")
+    # entities.append(stgp_e)
+
     sys.stdout.flush()
 
     for session in range(1):
@@ -562,6 +583,6 @@ if __name__ == "__main__":
         blotter_data_file = open(blot_fname, 'w')
 
         market_session(sess_id, start_time, end_time, entities, traders_spec, order_sched, summary_data_file, tape_data_file,
-                       blotter_data_file, True)
+                       blotter_data_file, False)
 
     print('\n Experiment Finished')

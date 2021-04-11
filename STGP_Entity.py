@@ -44,6 +44,7 @@ class STGP_Entity(Entity):
         self.pset, self.toolbox = self.create_deap_toolbox_and_pset()
 
         self.exprs = []
+        self.traders = {}
 
     def create_deap_toolbox_and_pset(self):
         # initialise pset
@@ -79,7 +80,8 @@ class STGP_Entity(Entity):
 
         for count, expr in enumerate(self.exprs):
             trading_function = gp.compile(gp.PrimitiveTree(expr), self.pset)
-            self.traders[count] = STGP_Trader(count, balance, time, trading_function)
+            tname = 'STGP%02d' % count
+            self.traders[tname] = STGP_Trader(count, balance, time, trading_function)
         
 
 if __name__ == "__main__":
@@ -87,15 +89,18 @@ if __name__ == "__main__":
     
     e = STGP_Entity(0, 100)
     e.init_traders(10, 100, datetime.datetime.now())
+    print(e.traders)
 
-    trader = e.traders[0]
+    # trader = e.traders[0]
+    # trader._update_ema(10)
+    # draw_expr(e.exprs[0])
 
-    order = Assignment("CUS", tname, 'Bid', 'LIM', 
-                       10, 1, 1, None, 1)
-    trader.add_cust_order()
+    # order = Assignment("CUS", "123", 'Bid', 'LIM', 
+    #                    10, 1, 1, None, 1)
+    # trader.add_cust_order(order, verbose=True)
+    # print(e.traders[0].getorder(0, 0, [0], True))
 
 
-    print(e.traders[0].getorder(0, 0, [0], True))
 
     # exprs = e.toolbox.population(10)
     # draw_expr(exprs[0])
@@ -104,6 +109,5 @@ if __name__ == "__main__":
     # function = gp.compile(a_tree, e.pset)
     # print(function(1))
 
-    # TODO complete STGP_Trader class
     # TODO register traders on the exchange
     # TODO trader evaluation and evolution
