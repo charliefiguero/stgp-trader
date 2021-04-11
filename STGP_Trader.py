@@ -63,6 +63,7 @@ class STGP_Trader(Trader):
         """ Update exponential moving average indicator for the trader. """
         if self.ema == None: self.ema = price
         else: self.ema = self.ema_param * price + (1 - self.ema_param) * self.ema
+        # testing git
     
 
 
