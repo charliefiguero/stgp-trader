@@ -81,7 +81,7 @@ class STGP_Entity(Entity):
         for count, expr in enumerate(self.exprs):
             trading_function = gp.compile(gp.PrimitiveTree(expr), self.pset)
             tname = 'STGP%02d' % count
-            self.traders[tname] = STGP_Trader(count, balance, time, trading_function)
+            self.traders[tname] = STGP_Trader(tname, balance, time, trading_function)
         
 
 if __name__ == "__main__":

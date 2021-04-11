@@ -308,6 +308,8 @@ def market_session(session_id, starttime, endtime, entities, trader_spec, order_
     traders.update(stgp.traders)
 
     # TODO add traders to trader_stats
+    # add traders to trader_stats
+    
 
     ########################################
 
