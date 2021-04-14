@@ -5,6 +5,7 @@ import random
 import operator
 import numpy
 import datetime
+from typing import NewType
 
 from deap import gp, creator, base, tools, algorithms
 import pygraphviz as pgv
@@ -39,12 +40,18 @@ def draw_expr(expr):
 
 class STGP_Entity(Entity):
 
-    def __init__(self, id, init_balance):
+    def __init__(self, id, init_balance, job):
         super().__init__(id, init_balance, 0, {})
-        self.pset, self.toolbox = self.create_deap_toolbox_and_pset()
 
+        if job != 'BUY' and job != 'SELL':
+            raise ValueError('Tried to initialise entity with unknown job type. \
+Should be either \'BUY\' or \'SELL\'.')
+        self.job = job
+
+        self.pset, self.toolbox = self.create_deap_toolbox_and_pset()
         self.exprs = []
-        self.traders = {}
+        self.buy_traders = {}
+        self.sell_traders = {}
 
     def create_deap_toolbox_and_pset(self):
         # initialise pset
@@ -75,20 +82,19 @@ class STGP_Entity(Entity):
 
         return pset, toolbox
 
-    def init_traders(self, n, balance, time):
+    def init_traders(self, n: int, balance: int, time: float):
         self.exprs = self.toolbox.population(n)
 
         for count, expr in enumerate(self.exprs):
             trading_function = gp.compile(gp.PrimitiveTree(expr), self.pset)
-            tname = 'STGP%02d' % count
+            tname = 'STGP_%02d' % count
             self.traders[tname] = STGP_Trader(tname, balance, time, trading_function)
         
 
 if __name__ == "__main__":
-
     
-    e = STGP_Entity(0, 100)
-    e.init_traders(10, 100, datetime.datetime.now())
+    e = STGP_Entity(0, 100, 'BUY')
+    e.init_traders(10, 100, 0.0)
     print(e.traders)
 
     # trader = e.traders[0]

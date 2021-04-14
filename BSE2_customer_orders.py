@@ -200,6 +200,10 @@ def customer_orders(time, traders, trader_stats, os, pending, base_oid, verbose)
             sys.exit('Fail: time=%5.2f not within any timezone in os=%s' % (current_time, os))
         return schedrange, sch_mode, sched_end_time
 
+
+    ################################################
+
+
     n_buyers = trader_stats['n_buyers']
     n_sellers = trader_stats['n_sellers']
 

@@ -162,7 +162,7 @@ def populate_market(entities, traders_specification, traders, shuffle, verbose):
 
 
 # one session in the market
-def market_session(session_id, starttime, endtime, entities, trader_spec, order_schedule, summaryfile, tapedumpfile,
+def market_session(session_id, starttime, endtime, entities, stgp_entities, trader_spec, order_schedule, summaryfile, tapedumpfile,
                    blotterdumpfile, verbose):
 
     def blotterdump(all_traders, blotdumpfile):
@@ -296,22 +296,27 @@ def market_session(session_id, starttime, endtime, entities, trader_spec, order_
             traders[trader].lei = entities[e].lei
             e += 1
 
+    
+    ############ STGP additions ############
 
-    ########################################
 
     # initialise stgp entity
-    stgp = STGP_Entity("stgp", 10000)
+    stgp = STGP_Entity("stgp", 10000, "BUY")
     entities.append(stgp)
+
+    # TODO : give stgp traders a namespace for tnames that fits with populate_market
 
     # intialise stgp traders
     stgp.init_traders(10, 100000, 0)
     traders.update(stgp.traders)
 
-    # TODO add traders to trader_stats
     # add traders to trader_stats
-    
+    if stgp.job == "BUY":
+        trader_stats['n_buyers'] += len(stgp.traders)
+
 
     ########################################
+
 
     #show what we've got
     if verbose:
@@ -559,15 +564,23 @@ if __name__ == "__main__":
     for e in range(total_traders):
         lei = 'LEI%03d' % e
         print(lei)
-        e = Entity(lei, 100, 0, [])
-        entities.append(e)
+        entity = Entity(lei, 100, 0, [])
+        entities.append(entity)
         if verbose:
-            print(e)
+            print(entity)
 
-    # # Add STGP entity
-    # stgp_e = STGP_Entity(id="STGP_BOI", init_balance=100)
-    # print("stgp_e")
-    # entities.append(stgp_e)
+
+    ############ Add STGP entities ############
+
+    # TODO: refactor code to use this section instead of initialising in market session
+
+    # stgp_e = STGP_Entity(id="STGP_ENTITY", init_balance=10000, job="BUY")
+    # stgp_entities = [stgp_e]
+    stgp_entities = []
+
+
+    #########################################
+
 
     sys.stdout.flush()
 
@@ -584,7 +597,8 @@ if __name__ == "__main__":
         blot_fname = sess_id + 'blotters.csv'
         blotter_data_file = open(blot_fname, 'w')
 
-        market_session(sess_id, start_time, end_time, entities, traders_spec, order_sched, summary_data_file, tape_data_file,
+        market_session(sess_id, start_time, end_time, entities, stgp_entities, 
+                       traders_spec, order_sched, summary_data_file, tape_data_file,
                        blotter_data_file, False)
 
     print('\n Experiment Finished')
