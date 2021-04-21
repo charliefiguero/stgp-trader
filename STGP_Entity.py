@@ -88,6 +88,13 @@ Should be either \'BUY\' or \'SELL\'.')
         for count, expr in enumerate(self.exprs):
             trading_function = gp.compile(gp.PrimitiveTree(expr), self.pset)
             tname = 'STGP_%02d' % count
+
+            # update tname for customer_orders shenanigans
+            if self.job == 'BUY':
+                tname = 'B' + tname
+            elif self.job == "SELL":
+                tname = 'S' + tname
+
             self.traders[tname] = STGP_Trader(tname, balance, time, trading_function)
         
 

@@ -10,7 +10,7 @@ from BSE2_trader_agents import Trader
 class STGP_Trader(Trader):
     
     def __init__(self, tid, balance, time, trading_func):
-        super().__init__("stgp_trader", tid, balance, time)
+        super().__init__("STGP", tid, balance, time)
 
         # trading function from STGP tree (calculates improvement on customer order).
         self.trading_func = trading_func
@@ -31,6 +31,8 @@ class STGP_Trader(Trader):
         else:
             self.limit = self.orders[0].price
             self.job = self.orders[0].atype
+
+            improvement = 0
 
             # calculate improvement on customer order
             if self.ema != None:
@@ -63,4 +65,4 @@ class STGP_Trader(Trader):
         """ Update exponential moving average indicator for the trader. """
         if self.ema == None: self.ema = price
         else: self.ema = self.ema_param * price + (1 - self.ema_param) * self.ema
-        
+    

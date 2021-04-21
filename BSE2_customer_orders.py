@@ -198,7 +198,7 @@ def customer_orders(time, traders, trader_stats, os, pending, base_oid, verbose)
                 got_one = True  # the first matching timezone has priority over any others
         if not got_one:
             sys.exit('Fail: time=%5.2f not within any timezone in os=%s' % (current_time, os))
-        return schedrange, sch_mode, sched_end_time
+        return schedrange, sch_mode, sched_end_time        
 
 
     ################################################
@@ -224,30 +224,56 @@ def customer_orders(time, traders, trader_stats, os, pending, base_oid, verbose)
         ordertype = 'Bid'
         orderstyle = 'LIM'
         (sched, mode, sched_end) = getschedmode(time, os['dem'])
-        for t in range(n_buyers):
-            issuetime = time + issuetimes[t]
-            tname = 'B%02d' % t
-            orderprice = getorderprice(t, sched_end, sched, n_buyers, mode, issuetime)
-            orderqty = random.randint(1, max_qty)
-            # order = Order(tname, ordertype, orderstyle, orderprice, orderqty, issuetime, None, oid)
-            order = Assignment("CUS", tname, ordertype, orderstyle, orderprice, orderqty, issuetime, None, oid)
-            oid += 1
-            new_pending.append(order)
+
+        i = 0
+        for trader_key in traders:
+            if trader_key.startswith('B'):
+                issuetime = time + issuetimes[i]
+                orderprice = getorderprice(i, sched_end, sched, n_buyers, mode, issuetime)
+                orderqty = random.randint(1, max_qty)
+                order = Assignment("CUS", trader_key, ordertype, orderstyle, orderprice, orderqty, issuetime, None, oid)
+                oid += 1
+                new_pending.append(order)
+                i += 1
+
+        # for t in range(n_buyers):
+        #     issuetime = time + issuetimes[t]
+        #     tname = 'B%02d' % t
+        #     orderprice = getorderprice(t, sched_end, sched, n_buyers, mode, issuetime)
+        #     orderqty = random.randint(1, max_qty)
+        #     # order = Order(tname, ordertype, orderstyle, orderprice, orderqty, issuetime, None, oid)
+        #     order = Assignment("CUS", tname, ordertype, orderstyle, orderprice, orderqty, issuetime, None, oid)
+        #     oid += 1
+        #     new_pending.append(order)
+
 
         # supply side (sellers)
         issuetimes = getissuetimes(n_sellers, os['timemode'], os['interval'], shuffle_times, True)
         ordertype = 'Ask'
         orderstyle = 'LIM'
         (sched, mode, sched_end) = getschedmode(time, os['sup'])
-        for t in range(n_sellers):
-            issuetime = time + issuetimes[t]
-            tname = 'S%02d' % t
-            orderprice = getorderprice(t, sched_end, sched, n_sellers, mode, issuetime)
-            orderqty = random.randint(1, max_qty)
-            # order = Order(tname, ordertype, orderstyle, orderprice, orderqty, issuetime, None, oid)
-            order = Assignment("CUS", tname, ordertype, orderstyle, orderprice, orderqty, issuetime, None, oid)
-            oid += 1
-            new_pending.append(order)
+
+        i = 0
+        for trader_key in traders:
+            if trader_key.startswith('S'):
+                issuetime = time + issuetimes[i]
+                orderprice = getorderprice(i, sched_end, sched, n_sellers, mode, issuetime)
+                orderqty = random.randint(1, max_qty)
+                order = Assignment("CUS", trader_key, ordertype, orderstyle, orderprice, orderqty, issuetime, None, oid)
+                oid += 1
+                new_pending.append(order)
+                i += 1
+
+        # for t in range(n_sellers):
+        #     issuetime = time + issuetimes[t]
+        #     tname = 'S%02d' % t
+        #     orderprice = getorderprice(t, sched_end, sched, n_sellers, mode, issuetime)
+        #     orderqty = random.randint(1, max_qty)
+        #     # order = Order(tname, ordertype, orderstyle, orderprice, orderqty, issuetime, None, oid)
+        #     order = Assignment("CUS", tname, ordertype, orderstyle, orderprice, orderqty, issuetime, None, oid)
+        #     oid += 1
+        #     new_pending.append(order)
+
     else:
         # there are pending future orders: issue any whose timestamp is in the past
         new_pending = []

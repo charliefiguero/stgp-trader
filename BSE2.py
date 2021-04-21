@@ -50,6 +50,7 @@ import sys
 import random
 # import csv
 # from datetime import datetime
+from typing import List
 
 # import matplotlib.pyplot as plt
 # import numpy as np
@@ -106,7 +107,7 @@ def trade_stats(expid, traders, dumpfile, time, lob):
 # create a bunch of traders from traders_specification, links them to the relevant entities
 # returns tuple (n_buyers, n_sellers)
 # optionally shuffles the pack of buyers and the pack of sellers
-def populate_market(entities, traders_specification, traders, shuffle, verbose):
+def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specification, traders, shuffle, verbose):
 
     def shuffle_traders(ttype_char, n, shuff_traders):
         for swap in range(n):
@@ -131,8 +132,20 @@ def populate_market(entities, traders_specification, traders, shuffle, verbose):
     if n_buyers < 1:
         sys.exit('FATAL: no buyers specified\n')
 
-    if shuffle:
-        shuffle_traders('B', n_buyers, traders)
+    ### Initialise STGP traders ###
+
+    num_buyers_per_entity = 100
+    starting_balance = 100
+
+    for stgpe in stgp_entities:
+        stgpe.init_traders(num_buyers_per_entity, num_buyers_per_entity * starting_balance, 0)
+        n_buyers += num_buyers_per_entity
+        traders.update(stgpe.traders)
+
+    ###############################
+
+    # if shuffle:
+    #     shuffle_traders('B', n_buyers, traders)
 
     n_sellers = 0
     for ss in traders_specification['sellers']:
@@ -145,8 +158,8 @@ def populate_market(entities, traders_specification, traders, shuffle, verbose):
     if n_sellers < 1:
         sys.exit('FATAL: no sellers specified\n')
 
-    if shuffle:
-        shuffle_traders('S', n_sellers, traders)
+    # if shuffle:
+    #     shuffle_traders('S', n_sellers, traders)
 
     if verbose:
         print('>populate_market()')
@@ -280,43 +293,26 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
 
     # create a bunch of traders
     traders = {}
-    trader_stats = populate_market(entities, trader_spec, traders, True, verbose)
+    trader_stats = populate_market(entities, stgp_entities, trader_spec, traders, True, verbose)
 
 
     # assign traders to entities: currently done on a one-to-one mapping; barf if mismatch
     # this code is VERY specific -- needs refactoring to make it more generic
-    if len(traders) != len(entities):
-        sys.stdout.flush()
-        sys.exit('FAIL: #traders doesn\'t match #entities in market_session()')
-    else:
-        e = 0
-        sys.stdout.flush()
-        for trader in traders:
-            entities[e].traders=[trader]
-            traders[trader].lei = entities[e].lei
-            e += 1
+    # if len(traders) != len(entities):
+    #     sys.stdout.flush()
+    #     sys.exit('FAIL: #traders doesn\'t match #entities in market_session()')
+    # else:
+    #     e = 0
+    #     sys.stdout.flush()
+    #     for trader in traders:
+    #         entities[e].traders=[trader]
+    #         traders[trader].lei = entities[e].lei
+    #         e += 1
 
-    
-    ############ STGP additions ############
-
-
-    # initialise stgp entity
-    stgp = STGP_Entity("stgp", 10000, "BUY")
-    entities.append(stgp)
-
-    # TODO : give stgp traders a namespace for tnames that fits with populate_market
-
-    # intialise stgp traders
-    stgp.init_traders(10, 100000, 0)
-    traders.update(stgp.traders)
-
-    # add traders to trader_stats
-    if stgp.job == "BUY":
-        trader_stats['n_buyers'] += len(stgp.traders)
-
-
-    ########################################
-
+    sys.stdout.flush()
+    not_stgp_traders = {k:v for (k,v) in traders.items() if not v.ttype == "STGP"} 
+    for count, trader in enumerate(not_stgp_traders):
+        entities[count].traders=[trader]
 
     #show what we've got
     if verbose:
@@ -574,9 +570,8 @@ if __name__ == "__main__":
 
     # TODO: refactor code to use this section instead of initialising in market session
 
-    # stgp_e = STGP_Entity(id="STGP_ENTITY", init_balance=10000, job="BUY")
-    # stgp_entities = [stgp_e]
-    stgp_entities = []
+    stgp_e = STGP_Entity(id="STGP_ENTITY", init_balance=10000, job="BUY")
+    stgp_entities = [stgp_e]
 
 
     #########################################
