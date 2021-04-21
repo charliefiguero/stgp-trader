@@ -36,16 +36,22 @@ class STGP_Trader(Trader):
 
             # calculate improvement on customer order
             if self.ema != None:
-                if self.job == 'Bid':
-                    # currently a buyer (working a bid order)
-                    improvement = -self.trading_func(self.ema)
-                else:
-                    # currently a seller (working a sell order)
-                    improvement = self.trading_func(self.ema)
+                improvement = self.trading_func(self.ema)
+                
+
+
+            # resets negative improvements
+            if improvement < 0:
+                improvement = 0
 
             if verbose:
                 print(f"improvement: {improvement}")
-            quoteprice = int(self.limit + improvement)
+
+            if self.job == 'Bid':
+                quoteprice = int(self.limit - improvement)
+            elif self.job == 'Ask':
+                quoteprice = int(self.limit + improvement)
+
             self.price = quoteprice
 
             order = Order(self.tid, self.job, "LIM", quoteprice, 
