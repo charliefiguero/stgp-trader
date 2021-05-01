@@ -33,16 +33,16 @@ class STGP_Trader(Trader):
             self.job = self.orders[0].atype
 
             improvement = 0
-
-            # calculate improvement on customer order
+            
+            # calculate improvement on customer order via STGP function
             if self.ema != None:
                 improvement = self.trading_func(self.ema)
                 
-
-
             # resets negative improvements
             if improvement < 0:
                 improvement = 0
+
+            # print(f"trader: {self.tid}, limit price: {self.limit}, improvement found: {improvement}")
 
             if verbose:
                 print(f"improvement: {improvement}")
@@ -62,13 +62,12 @@ class STGP_Trader(Trader):
             print(f"stgp trader making order with price: {quoteprice}")
         return order
 
-    def respond(self, time, lob, trade, verbose):
-        """ Called by the market session to notify trader of LOB updates. """
-        if (trade != None):
-            self._update_ema(trade["price"]) # update EMA
-
     def _update_ema(self, price):
         """ Update exponential moving average indicator for the trader. """
         if self.ema == None: self.ema = price
         else: self.ema = self.ema_param * price + (1 - self.ema_param) * self.ema
-    
+
+    def respond(self, time, lob, trade, verbose):
+        """ Called by the market session to notify trader of LOB updates. """
+        if (trade != None):
+            self._update_ema(trade["price"]) # update EMA
