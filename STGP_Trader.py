@@ -14,6 +14,7 @@ class STGP_Trader(Trader):
 
         # trading function from STGP tree (calculates improvement on customer order).
         self.trading_func = trading_func
+        self.last_evolution = 0
 
         # Exponential Moving Average
         self.ema = None
@@ -59,7 +60,8 @@ class STGP_Trader(Trader):
 
             self.lastquote = order
 
-            print(f"stgp trader making order with price: {quoteprice}")
+            if verbose:
+                print(f"stgp trader making order with price: {quoteprice}")
         return order
 
     def _update_ema(self, price):

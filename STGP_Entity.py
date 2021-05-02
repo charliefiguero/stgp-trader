@@ -6,6 +6,7 @@ import operator
 import numpy
 import datetime
 from typing import NewType
+from time import sleep
 
 from deap import gp, creator, base, tools, algorithms
 import pygraphviz as pgv
@@ -19,7 +20,7 @@ from STGP_Trader import STGP_Trader
 def if_then_else(inputed, output1, output2):
     return output1 if inputed else output2
 
-def draw_expr(expr):
+def draw_expr(expr, name=None):
     nodes, edges, labels = gp.graph(expr)
 
     ### Graphviz Section ###
@@ -35,7 +36,10 @@ def draw_expr(expr):
     # saves to tree.pdf
     now = datetime.datetime.now()
     # print(f"Current time: {now}\n")
-    g.draw(f"trees/tree {now}.pdf")
+    if not name == None:
+        g.draw(f"trees/tree {name}.pdf")
+    else:
+        g.draw(f"trees/tree {now}.pdf")
 
 
 class STGP_Entity(Entity):
@@ -51,6 +55,10 @@ class STGP_Entity(Entity):
         self.pset, self.toolbox = self.create_deap_toolbox_and_pset()
         self.exprs = []
         self.traders = {}
+        self.traders_count = 0
+
+        self.eval_time = 50
+        self.last_update = 0
 
     def create_deap_toolbox_and_pset(self):
         # initialise pset
@@ -73,14 +81,20 @@ class STGP_Entity(Entity):
         # create fitness class
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
         # create individual class
-        creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax)
+        creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, trader_id = None)
 
         # create toolbox
         toolbox = base.Toolbox()
+        # init tools
         toolbox.register("expr", gp.genFull, pset=pset, min_=1, max_=3)
         toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-        toolbox.register("evaluate", self.evaluate_trader)
+        # evolution tools
+        toolbox.register("evaluate", self.evaluate_expr)
+        toolbox.register("select", tools.selTournament, tournsize=3)
+        toolbox.register("mate", gp.cxOnePoint)
+        toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
+        toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
         return pset, toolbox
 
@@ -88,6 +102,9 @@ class STGP_Entity(Entity):
         self.exprs = self.toolbox.population(n)
 
         for count, expr in enumerate(self.exprs):
+            # traders never get the same id
+            count += self.traders_count
+
             trading_function = gp.compile(gp.PrimitiveTree(expr), self.pset)
             tname = 'STGP_%02d' % count
 
@@ -97,64 +114,136 @@ class STGP_Entity(Entity):
             elif self.job == "SELL":
                 tname = 'S' + tname
 
+            expr.trader_id = tname
             self.traders[tname] = STGP_Trader(tname, balance, time, trading_function)
 
-    def evaluate_trader(self, trader):
-        return trader.profitpertime
+        self.traders_count += len(self.exprs)
+
+    # used for self.toolbox.evaluate
+    def evaluate_expr(self, improvement_expr):
+        return self.traders[improvement_expr.trader_id].profitpertime
 
     def evaluate_population(self):
         """ calculate fitnesses for the population """
-        return map(toolbox.evaluate, self.traders.values)
+        return map(self.toolbox.evaluate, self.exprs)
 
-    def evolve_population(self):
+    def evolve_population(self, time):
         CXPB, MUTPB, NGEN = 0.5, 0.2, 40
 
+        print("evolving population")
+        # for t in self.exprs:
+        #     print(t.trader_id)
+        
         # Evaluate the entire population
-        fitnesses = evaluate_population()
+        fitnesses = self.evaluate_population()
         # Select the next generation individuals
-        offspring = toolbox.select(self.pop, len(pop))
+        offspring = self.toolbox.select(self.exprs, len(self.exprs))
         # Clone the selected individuals
-        offspring = map(toolbox.clone, offspring)
+        offspring = list(map(self.toolbox.clone, offspring))
+        # print(offspring[0].fitness.values)
 
         # Apply crossover and mutation on the offspring
+        # [::2] means nothing for first and second argument and jump by 2.
         for child1, child2 in zip(offspring[::2], offspring[1::2]):
             if random.random() < CXPB:
-                toolbox.mate(child1, child2)
+                print(f"about to mate: Child1: {child1}   Child2: {child2}")
+                # draw_expr(child1, "child1 pre")
+                # draw_expr(child2, "child2 pre")
+                self.toolbox.mate(child1, child2)
                 del child1.fitness.values
                 del child2.fitness.values
+                print(f"mated: Child1: {child1}   Child2: {child2}")
+                # draw_expr(child1, "child1 post")
+                # draw_expr(child2, "child2 post")
+
+                print()
+
+        print()
 
         for mutant in offspring:
             if random.random() < MUTPB:
-                toolbox.mutate(mutant)
+                print(f"about to mutate: {mutant}")
+                # draw_expr(mutant, f"tree pre {mutant}")
+                self.toolbox.mutate(mutant)
                 del mutant.fitness.values
+                print(f"mutant: {mutant}")
+                # draw_expr(mutant, f"tree post {mutant}")
+                print()
+
+                print(f"test, {mutant.trader_id}")
 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = map(toolbox.evaluate, invalid_ind)
+        print(len(invalid_ind))
+        fitnesses = map(self.toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
+            # print(f"fit: {fit}")
+            # print(f"values: {ind.fitness.values}")
+            ind.fitness.values = (fit,)
 
         # The population is entirely replaced by the offspring
-        pop[:] = offspring
+        self.exprs[:] = offspring
+        self.update_trader_expr(time)
 
-        return pop
-        
+        sleep(1)
+
+        return self.exprs
+
+    def update_trader_expr(self, time):
+        if not len(self.exprs) == len(self.traders):
+            raise ValueError(f"len(exprs): {len(self.exprs)} != len(traders): {len(self.traders)}")
+
+        for count, trader in enumerate(self.traders.values()):
+            expr = self.exprs[count]
+            print(trader)
+            trader.trading_func = gp.compile(gp.PrimitiveTree(expr), self.pset)
+            expr.trader_id = trader.tid
+            trader.last_evolution = time
+
+    def entity_update(self, time):
+        if time - self.last_update > self.eval_time:
+            self.evolve_population(time)
+            self.last_update = time
+
 
 if __name__ == "__main__":
     
     e = STGP_Entity(0, 100, 'BUY')
     e.init_traders(10, 100, 0.0)
 
-    # for trader in e.traders:
-    #     print(trader)
+    print("traders pre evolution")
+    for expr in e.exprs:
+        print(expr)
 
     print()
+
+    for expr in e.exprs:
+        print(expr.trader_id)
+
+    e.evolve_population(0)
+    print()
+
+    for expr in e.exprs:
+        print(expr.trader_id)
+
+    print("expr post evolution")
+    for expr in e.exprs:
+        print(expr)
 
     # for expr in e.exprs:
     #     print(expr)
     # e.exprs[0].fitness.values = e.evaluate_trader(e.exprs[0])
-    print(e.exprs[0].count)
-    print(dir(e.exprs[0]))
+
+    # print(e.exprs[0].trader_id)
+    # print(e.exprs[1].trader_id)
+    # print(e.exprs[2].trader_id)
+    # for expr in e.exprs:
+    #     print(expr.trader_id)
+
+    # print(len(e.exprs))
+    # print(len(e.traders))
+    # print(e.traders.keys())
+
 
 
 

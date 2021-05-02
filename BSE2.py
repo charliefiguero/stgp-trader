@@ -350,6 +350,10 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
 
         # trade = None
 
+        # notify entities of time passing
+        for e in stgp_entities: 
+            e.entity_update(time)
+
         # get any new assignments (customer orders) for traders to execute
         # and also any customer orders that require previous orders to be killed -- kills is list of trader-IDs
         [pending_cust_orders, kills, noid] = customer_orders(time, traders, trader_stats,
