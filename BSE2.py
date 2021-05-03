@@ -530,7 +530,9 @@ if __name__ == "__main__":
     verbose = False
 
     start_time = 0.0
-    end_time = 200.0
+    end_time = 100000.0
+
+
     # end_time=25200 # 7 hours x 60 min x 60 sec /
     duration = end_time - start_time
 
@@ -573,7 +575,6 @@ if __name__ == "__main__":
 
     ############ Add STGP entities ############
 
-    # TODO: refactor code to use this section instead of initialising in market session
 
     stgp_e = STGP_Entity(id="STGP_ENTITY", init_balance=10000, job="BUY")
     stgp_entities = [stgp_e]
@@ -600,5 +601,8 @@ if __name__ == "__main__":
         market_session(sess_id, start_time, end_time, entities, stgp_entities, 
                        traders_spec, order_sched, summary_data_file, tape_data_file,
                        blotter_data_file, False)
+
+    # stgp_e.print_t_gen_profits()
+    stgp_e.total_gen_profits()
 
     print('\n Experiment Finished')

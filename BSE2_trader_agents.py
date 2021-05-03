@@ -590,20 +590,26 @@ class Trader_ZIP(Trader):
         if verbose and (bid_improved or bid_hit or ask_improved or ask_lifted):
             print ('B_improved', bid_improved, 'B_hit', bid_hit, 'A_improved', ask_improved, 'A_lifted', ask_lifted)
 
+        # print(f"bid hit: {bid_hit}, ask lifted: {ask_lifted}")
+
         deal = bid_hit or ask_lifted
 
         if self.job == 'Ask':
             # seller
             if deal:
-                tradeprice = trade['price']
-                if self.price <= tradeprice:
-                    # could sell for more? raise margin
-                    target_price = target_up(tradeprice)
-                    profit_alter(target_price)
-                elif ask_lifted and self.active and not willing_to_trade(tradeprice):
-                    # wouldnt have got this deal, still working order, so reduce margin
-                    target_price = target_down(tradeprice)
-                    profit_alter(target_price)
+                try:
+                    tradeprice = trade['price']
+                    if self.price <= tradeprice:
+                        # could sell for more? raise margin
+                        target_price = target_up(tradeprice)
+                        profit_alter(target_price)
+                    elif ask_lifted and self.active and not willing_to_trade(tradeprice):
+                        # wouldnt have got this deal, still working order, so reduce margin
+                        target_price = target_down(tradeprice)
+                        profit_alter(target_price)
+                except TypeError as e:
+                    # TODO: fix this
+                    print("trade is None, how is this possible?")
             else:
                 # no deal: aim for a target price higher than best bid
                 if ask_improved and self.price > lob_best_ask_p:
@@ -616,15 +622,20 @@ class Trader_ZIP(Trader):
         if self.job == 'Bid':
             # buyer
             if deal:
-                tradeprice = trade['price']
-                if self.price >= tradeprice:
-                    # could buy for less? raise margin (i.e. cut the price)
-                    target_price = target_down(tradeprice)
-                    profit_alter(target_price)
-                elif bid_hit and self.active and not willing_to_trade(tradeprice):
-                    # wouldnt have got this deal, still working order, so reduce margin
-                    target_price = target_up(tradeprice)
-                    profit_alter(target_price)
+                try:
+                    tradeprice = trade['price']
+                    if self.price >= tradeprice:
+                        # could buy for less? raise margin (i.e. cut the price)
+                        target_price = target_down(tradeprice)
+                        profit_alter(target_price)
+                    elif bid_hit and self.active and not willing_to_trade(tradeprice):
+                        # wouldnt have got this deal, still working order, so reduce margin
+                        target_price = target_up(tradeprice)
+                        profit_alter(target_price)
+                except TypeError as e:
+                    # TODO: fix this
+                    print("trade is None, how is this possible?")
+
             else:
                 # no deal: aim for target price lower than best ask
                 if bid_improved and self.price < lob_best_bid_p:

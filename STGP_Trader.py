@@ -27,6 +27,7 @@ class STGP_Trader(Trader):
         self.ema_param = 2 / float(self.nLastTrades + 1)
 
     def get_profit(self, time):
+        if time == 0: return 0
         return self.profit_since_evolution / time
 
     def reset_gen_profits(self):
@@ -91,8 +92,12 @@ class STGP_Trader(Trader):
         super().bookkeep(msg, time, verbose)
         if msg.event == "FILL" and msg.trns[0]["Price"] == self.lastquote.price:
             improvement = abs(msg.trns[0]["Price"] - self.limit)
-            self.profit_since_evolution = improvement
-            print(self.profit_since_evolution)
+            self.profit_since_evolution += improvement
+            print(f"Improvement: {improvement}")
 
+    def print_gen_profits(self):
+        print(f"profits for trader: {self.tid}")
+        for count, p in enumerate(self.generational_profits):
+            print(f"gen: {count}, profit: {p}")
 
 
