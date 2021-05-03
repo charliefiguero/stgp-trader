@@ -2,6 +2,7 @@
 
 import sys
 import random
+from time import sleep
 
 from BSE2_msg_classes import Assignment, Order, ExchMsg
 from BSE2_trader_agents import Trader
@@ -14,12 +15,29 @@ class STGP_Trader(Trader):
 
         # trading function from STGP tree (calculates improvement on customer order).
         self.trading_func = trading_func
-        self.last_evolution = 0
+        self.last_evolution = 0.0
+
+        # profit tracking
+        self.profit_since_evolution = 0
+        self.generational_profits = []
 
         # Exponential Moving Average
         self.ema = None
         self.nLastTrades = 5
         self.ema_param = 2 / float(self.nLastTrades + 1)
+
+    def get_profit(self, time):
+        return self.profit_since_evolution / time
+
+    def reset_gen_profits(self):
+        """ Called after the expr has been updated due to evolution. """
+        self.generational_profits.append(self.profit_since_evolution)
+        self.profit_since_evolution = 0
+
+    def _update_ema(self, price):
+        """ Update exponential moving average indicator for the trader. """
+        if self.ema == None: self.ema = price
+        else: self.ema = self.ema_param * price + (1 - self.ema_param) * self.ema
 
     def getorder(self, time, countdown, lob, verbose):
         """ Called by the market session to get an order from this trader. """
@@ -60,16 +78,21 @@ class STGP_Trader(Trader):
 
             self.lastquote = order
 
-            if verbose:
-                print(f"stgp trader making order with price: {quoteprice}")
+            # if verbose:
+            # print(f"stgp trader making order with price: {quoteprice}")
         return order
-
-    def _update_ema(self, price):
-        """ Update exponential moving average indicator for the trader. """
-        if self.ema == None: self.ema = price
-        else: self.ema = self.ema_param * price + (1 - self.ema_param) * self.ema
 
     def respond(self, time, lob, trade, verbose):
         """ Called by the market session to notify trader of LOB updates. """
         if (trade != None):
             self._update_ema(trade["price"]) # update EMA
+
+    def bookkeep(self, msg, time, verbose):
+        super().bookkeep(msg, time, verbose)
+        if msg.event == "FILL" and msg.trns[0]["Price"] == self.lastquote.price:
+            improvement = abs(msg.trns[0]["Price"] - self.limit)
+            self.profit_since_evolution = improvement
+            print(self.profit_since_evolution)
+
+
+

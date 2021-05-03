@@ -296,7 +296,7 @@ class Orderbook_half:
         trnsctns = []  # details of transactions resulting from this incoming order walking the book
         tape_events = []  # details of transaction events to be written onto tape
         qty_filled = 0  # how much of this order have we filled so far?
-        fee = 333  # exchange fee charged for processing this order (taking liquidity, wrt maker-taker)
+        fee = 0  # exchange fee charged for processing this order (taking liquidity, wrt maker-taker)
 
         if verbose:
             print('>book_take(): order=%s, lob=%s' % (order, self.lob))

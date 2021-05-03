@@ -120,27 +120,24 @@ class STGP_Entity(Entity):
         self.traders_count += len(self.exprs)
 
     # used for self.toolbox.evaluate
-    def evaluate_expr(self, improvement_expr):
-        return self.traders[improvement_expr.trader_id].profitpertime
+    def evaluate_expr(self, improvement_expr, time):
+        return self.traders[improvement_expr.trader_id].get_profit(time)
 
-    def evaluate_population(self):
+    def evaluate_population(self, time):
         """ calculate fitnesses for the population """
-        return map(self.toolbox.evaluate, self.exprs)
+        return map(lambda x: self.toolbox.evaluate(x, time), self.exprs)
 
     def evolve_population(self, time):
         CXPB, MUTPB, NGEN = 0.5, 0.2, 40
 
-        print("evolving population")
-        # for t in self.exprs:
-        #     print(t.trader_id)
+        print("Evolving population")
         
         # Evaluate the entire population
-        fitnesses = self.evaluate_population()
+        fitnesses = self.evaluate_population(time)
         # Select the next generation individuals
         offspring = self.toolbox.select(self.exprs, len(self.exprs))
         # Clone the selected individuals
         offspring = list(map(self.toolbox.clone, offspring))
-        # print(offspring[0].fitness.values)
 
         # Apply crossover and mutation on the offspring
         # [::2] means nothing for first and second argument and jump by 2.
@@ -155,27 +152,21 @@ class STGP_Entity(Entity):
                 print(f"mated: Child1: {child1}   Child2: {child2}")
                 # draw_expr(child1, "child1 post")
                 # draw_expr(child2, "child2 post")
-
-                print()
-
+                
         print()
 
         for mutant in offspring:
             if random.random() < MUTPB:
-                print(f"about to mutate: {mutant}")
+                print(f"about to mutate: {mutant} \n")
                 # draw_expr(mutant, f"tree pre {mutant}")
                 self.toolbox.mutate(mutant)
                 del mutant.fitness.values
                 print(f"mutant: {mutant}")
                 # draw_expr(mutant, f"tree post {mutant}")
-                print()
-
-                print(f"test, {mutant.trader_id}")
 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        print(len(invalid_ind))
-        fitnesses = map(self.toolbox.evaluate, invalid_ind)
+        fitnesses = map(lambda x: self.toolbox.evaluate(x, time), invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             # print(f"fit: {fit}")
             # print(f"values: {ind.fitness.values}")
@@ -187,6 +178,10 @@ class STGP_Entity(Entity):
 
         sleep(1)
 
+        # reset trader stats for logging
+        for trader in self.traders.values():
+            trader.reset_gen_profits()
+
         return self.exprs
 
     def update_trader_expr(self, time):
@@ -195,12 +190,12 @@ class STGP_Entity(Entity):
 
         for count, trader in enumerate(self.traders.values()):
             expr = self.exprs[count]
-            print(trader)
             trader.trading_func = gp.compile(gp.PrimitiveTree(expr), self.pset)
             expr.trader_id = trader.tid
             trader.last_evolution = time
 
     def entity_update(self, time):
+        """ Called by market session every time tick. """
         if time - self.last_update > self.eval_time:
             self.evolve_population(time)
             self.last_update = time

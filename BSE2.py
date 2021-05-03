@@ -51,6 +51,7 @@ import random
 # import csv
 # from datetime import datetime
 from typing import List
+from time import sleep
 
 # import matplotlib.pyplot as plt
 # import numpy as np
@@ -134,7 +135,7 @@ def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specific
 
     ### Initialise STGP traders ###
 
-    num_buyers_per_entity = 100
+    num_buyers_per_entity = 10
     starting_balance = 100
 
     for stgpe in stgp_entities:
