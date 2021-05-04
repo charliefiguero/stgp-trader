@@ -5,9 +5,12 @@ import random
 import operator
 import numpy
 import datetime
+from datetime import datetime
 from typing import NewType
 from time import sleep
 from statistics import mean
+import jsonpickle
+import pprint
 
 from deap import gp, creator, base, tools, algorithms
 import pygraphviz as pgv
@@ -45,7 +48,7 @@ def draw_expr(expr, name=None):
 
 class STGP_Entity(Entity):
 
-    def __init__(self, id, init_balance, job):
+    def __init__(self, id, init_balance, job, duration):
         super().__init__(id, init_balance, 0, {})
 
         if job != 'BUY' and job != 'SELL':
@@ -54,15 +57,17 @@ class STGP_Entity(Entity):
         self.job = job
 
         self.pset, self.toolbox = self.create_deap_toolbox_and_pset()
-        self.exprs = []
+        self.exprs = [] # gp trees that are evolved
 
         # for logging
         self.prv_exprs = []
 
-        self.traders = {}
+        self.traders = {} # traders are passed compiled exprs
         self.traders_count = 0
 
-        self.eval_time = 5000
+        self.duration = duration
+        self.NUM_GENS = 10
+        self.EVAL_TIME = duration / self.NUM_GENS # evolves the pop every x seconds
         self.last_update = 0
 
     def create_deap_toolbox_and_pset(self):
@@ -137,7 +142,7 @@ class STGP_Entity(Entity):
     def evolve_population(self, time):
         CXPB, MUTPB, NGEN = 0.5, 0.2, 40
 
-        print(f"Evolving population for {self.lei}, generation: {time / self.eval_time}")
+        print(f"Evolving population for {self.lei}, generation: {int(time / self.EVAL_TIME)}")
         
         # Evaluate the entire population
         fitnesses = self.evaluate_population(time)
@@ -185,7 +190,7 @@ class STGP_Entity(Entity):
 
         # sleep(1)
 
-        # reset trader stats for logging
+        # reset trader stats for profit eval 
         for trader in self.traders.values():
             trader.reset_gen_profits()
 
@@ -206,7 +211,7 @@ class STGP_Entity(Entity):
 
     def entity_update(self, time):
         """ Called by market session every time tick. """
-        if time - self.last_update > self.eval_time:
+        if time - self.last_update > self.EVAL_TIME:
             self.evolve_population(time)
             self.last_update = time
 
@@ -242,25 +247,39 @@ class STGP_Entity(Entity):
 
         return output
 
+    # def write_total_gen_profits(self):
+    #     """ called at the end of experiment """
+    #     now = datetime.now() 
+
+    #     with open('stgp_csvs/improvements/' + str(now), 'w') as outfile:
+    #         outfile.write(f'num_gens: {self.NUM_GENS}\n')
+    #         outfile.write(f'num_traders: {len(self.traders)}\n')
+    #         for tr in self.traders.values():
+    #             outfile.write(f'trader: {tr.tid}: ')
+    #             t_gen_profits = [(count, g_profit) for count, g_profit in enumerate(tr.get_gen_profits())]
+    #             for row in t_gen_profits:
+    #                 outfile.write(f'{row}, ')
+
+    def write_total_gen_profits(self):
+        """ called at the end of experiment """
+
+        data = {}
+        data["num_gens"] = self.NUM_GENS
+        data["num_traders"] = len(self.traders)
+        traders_data = {}
+        for tr in self.traders.values():
+            tr.all_gens_data.append(tr.current_gen_data)
+            traders_data[tr.tid] = tr.all_gens_data 
+        data["traders_data"] = traders_data
+
+        now = datetime.now() 
+        with open('stgp_csvs/improvements/' + str(now), 'w') as outfile:
+            outfile.write(jsonpickle.encode(data, indent=4))
+
 
 if __name__ == "__main__":
     
-    e = STGP_Entity("STGP0", 100, 'BUY')
+    e = STGP_Entity("STGP0", 100, 'BUY', 1000)
     e.init_traders(10, 100, 0.0)
 
-
-    # print(len(e.prv_exprs))
-    for expr in e.prv_exprs:
-        print(len(expr))
-
-    e.evolve_population(0)
-
-    # print(len(e.prv_exprs))
-    for expr in e.prv_exprs:
-        print(len(expr))
-
-    e.evolve_population(0)
-
-    # print(len(e.prv_exprs))
-    for expr in e.prv_exprs:
-        print(len(expr))
+    list(e.traders.values())[0].get_gen_profits()

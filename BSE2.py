@@ -296,20 +296,6 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
     traders = {}
     trader_stats = populate_market(entities, stgp_entities, trader_spec, traders, True, verbose)
 
-
-    # assign traders to entities: currently done on a one-to-one mapping; barf if mismatch
-    # this code is VERY specific -- needs refactoring to make it more generic
-    # if len(traders) != len(entities):
-    #     sys.stdout.flush()
-    #     sys.exit('FAIL: #traders doesn\'t match #entities in market_session()')
-    # else:
-    #     e = 0
-    #     sys.stdout.flush()
-    #     for trader in traders:
-    #         entities[e].traders=[trader]
-    #         traders[trader].lei = entities[e].lei
-    #         e += 1
-
     sys.stdout.flush()
     not_stgp_traders = {k:v for (k,v) in traders.items() if not v.ttype == "STGP"} 
     for count, trader in enumerate(not_stgp_traders):
@@ -348,8 +334,6 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
         time_left = (endtime - time) / float(session_duration)
         if verbose:
             print('\n\n%s; t=%08.2f (percent remaining: %4.1f/100) ' % (session_id, time, time_left * 100))
-
-        # trade = None
 
         # notify entities of time passing
         for e in stgp_entities: 
@@ -530,7 +514,7 @@ if __name__ == "__main__":
     verbose = False
 
     start_time = 0.0
-    end_time = 100000.0
+    end_time = 1000.0
 
 
     # end_time=25200 # 7 hours x 60 min x 60 sec /
@@ -551,7 +535,7 @@ if __name__ == "__main__":
                    'timemode': 'drip-poisson'}
     # 'timemode': 'periodic'}
 
-    buyers_spec = [('ZIP', 10)]
+    buyers_spec = [('GVWY', 10)]
     sellers_spec = buyers_spec
     traders_spec = {'sellers': sellers_spec, 'buyers': buyers_spec}
 
@@ -576,7 +560,7 @@ if __name__ == "__main__":
     ############ Add STGP entities ############
 
 
-    stgp_e = STGP_Entity(id="STGP_ENTITY", init_balance=10000, job="BUY")
+    stgp_e = STGP_Entity(id="STGP_ENTITY", init_balance=10000, job="BUY", duration=duration)
     stgp_entities = [stgp_e]
 
 
@@ -604,5 +588,6 @@ if __name__ == "__main__":
 
     # stgp_e.print_t_gen_profits()
     stgp_e.total_gen_profits()
+    stgp_e.write_total_gen_profits()
 
     print('\n Experiment Finished')

@@ -557,7 +557,7 @@ class Trader_ZIP(Trader):
         elif self.prev_best_bid_p is not None:
             # the bid LOB has been emptied: was it cancelled or hit?
             last_tape_item = lob['tape'][-1]
-            if last_tape_item['type'] == 'Cancel':
+            if last_tape_item['type'] == 'CAN':
                 bid_hit = False
             else:
                 bid_hit = True
@@ -582,7 +582,7 @@ class Trader_ZIP(Trader):
         elif self.prev_best_ask_p is not None:
             # the ask LOB is empty now but was not previously: canceled or lifted?
             last_tape_item = lob['tape'][-1]
-            if last_tape_item['type'] == 'Cancel':
+            if last_tape_item['type'] == 'CAN':
                 ask_lifted = False
             else:
                 ask_lifted = True

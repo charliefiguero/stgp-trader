@@ -5,4 +5,7 @@ trees/*.pdf
 .vscode/
 output.txt
 
+stgp_csvs/improvements/*
+!stgp_csvs/improvements/.gitkeep
+
 test.py

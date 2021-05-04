@@ -3,9 +3,34 @@
 import sys
 import random
 from time import sleep
+from typing import List
+import json
 
 from BSE2_msg_classes import Assignment, Order, ExchMsg
 from BSE2_trader_agents import Trader
+
+class Order_Data():
+
+    def __init__(self, customer_price, trans_price, posted_improve, actual_improve, exchange_msg):
+        self.customer_price = customer_price
+        self.trans_price = trans_price
+        self.posted_improve = posted_improve
+        self.actual_improve = actual_improve
+        self.exchange_msg = exchange_msg
+
+    def __repr__(self):
+        return str(self.__dict__)
+
+
+class Generation_Data():
+    
+    def __init__(self, tid: str, gen_num: int):
+        self.tid = tid
+        self.gen_num = gen_num
+        self.transactions: List[Order_Data] = []
+
+    def __repr__(self):
+        return str(self.__dict__)
 
 
 class STGP_Trader(Trader):
@@ -15,9 +40,10 @@ class STGP_Trader(Trader):
 
         # trading function from STGP tree (calculates improvement on customer order).
         self.trading_func = trading_func
-        self.last_evolution = 0.0
 
         # profit tracking
+        self.last_evolution = 0.0
+        self.current_gen = 0
         self.profit_since_evolution = 0
         self.generational_profits = []
 
@@ -26,14 +52,28 @@ class STGP_Trader(Trader):
         self.nLastTrades = 5
         self.ema_param = 2 / float(self.nLastTrades + 1)
 
+        # Stat tracking
+        self.all_gens_data = []
+        self.current_gen_data = Generation_Data(tid, self.current_gen)
+
+    
+    def del_cust_order(self, cust_order_id, verbose):
+        super().del_cust_order(cust_order_id, verbose)
+
     def get_profit(self, time):
+        """ Gets the profit of the current generation. Used for gp evaluation. """
         if time == 0: return 0
-        return self.profit_since_evolution / time
+        return self.profit_since_evolution
 
     def reset_gen_profits(self):
         """ Called after the expr has been updated due to evolution. """
         self.generational_profits.append(self.profit_since_evolution)
         self.profit_since_evolution = 0
+        self.current_gen += 1
+
+        # logging
+        self.all_gens_data.append(self.current_gen_data)
+        self.current_gen_data = Generation_Data(self.tid, self.current_gen)
 
     def _update_ema(self, price):
         """ Update exponential moving average indicator for the trader. """
@@ -42,9 +82,6 @@ class STGP_Trader(Trader):
 
     def getorder(self, time, countdown, lob, verbose):
         """ Called by the market session to get an order from this trader. """
-        if verbose:
-            print('STGP Trader getorder:')
-
         if len(self.orders) < 1:
             # no orders: return NULL
             order = None
@@ -57,30 +94,26 @@ class STGP_Trader(Trader):
             # calculate improvement on customer order via STGP function
             if self.ema != None:
                 improvement = self.trading_func(self.ema)
-                
             # resets negative improvements
             if improvement < 0:
                 improvement = 0
-
-            # print(f"trader: {self.tid}, limit price: {self.limit}, improvement found: {improvement}")
-
             if verbose:
-                print(f"improvement: {improvement}")
+                print(f"trader: {self.tid}, limit price: {self.limit}, improvement found: {improvement}")
 
+            print(f"trader: {self.tid}, limit price: {self.limit}, improvement found: {improvement}")
+
+            # buys for less, sells for more
             if self.job == 'Bid':
                 quoteprice = int(self.limit - improvement)
             elif self.job == 'Ask':
                 quoteprice = int(self.limit + improvement)
 
-            self.price = quoteprice
-
             order = Order(self.tid, self.job, "LIM", quoteprice, 
                           self.orders[0].qty, time, None, -1)
 
+            self.price = quoteprice
             self.lastquote = order
 
-            # if verbose:
-            # print(f"stgp trader making order with price: {quoteprice}")
         return order
 
     def respond(self, time, lob, trade, verbose):
@@ -89,15 +122,23 @@ class STGP_Trader(Trader):
             self._update_ema(trade["price"]) # update EMA
 
     def bookkeep(self, msg, time, verbose):
-        super().bookkeep(msg, time, verbose)
-        if msg.event == "FILL" and msg.trns[0]["Price"] == self.lastquote.price:
-            improvement = abs(msg.trns[0]["Price"] - self.limit)
+        if msg.event == "FILL":
+            improvement = abs(msg.trns[0]["Price"] - self.orders[0].price)
             self.profit_since_evolution += improvement
-            print(f"Improvement: {improvement}")
+
+            # for logging: customer price, trans price, attemted improvement, actual improvement, msg
+            new_order_data = Order_Data(self.limit, msg.trns[0]["Price"], self.price, improvement, msg)
+            self.current_gen_data.transactions.append(new_order_data)
+        
+        super().bookkeep(msg, time, verbose)
 
     def print_gen_profits(self):
         print(f"profits for trader: {self.tid}")
         for count, p in enumerate(self.generational_profits):
             print(f"gen: {count}, profit: {p}")
 
-
+    def get_gen_profits(self):
+        """ to be called at the end of experiment """
+        ps = self.generational_profits
+        ps.append(self.profit_since_evolution)
+        return ps
