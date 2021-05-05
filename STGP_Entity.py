@@ -247,19 +247,6 @@ class STGP_Entity(Entity):
 
         return output
 
-    # def write_total_gen_profits(self):
-    #     """ called at the end of experiment """
-    #     now = datetime.now() 
-
-    #     with open('stgp_csvs/improvements/' + str(now), 'w') as outfile:
-    #         outfile.write(f'num_gens: {self.NUM_GENS}\n')
-    #         outfile.write(f'num_traders: {len(self.traders)}\n')
-    #         for tr in self.traders.values():
-    #             outfile.write(f'trader: {tr.tid}: ')
-    #             t_gen_profits = [(count, g_profit) for count, g_profit in enumerate(tr.get_gen_profits())]
-    #             for row in t_gen_profits:
-    #                 outfile.write(f'{row}, ')
-
     def write_total_gen_profits(self):
         """ called at the end of experiment """
 

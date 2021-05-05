@@ -127,7 +127,9 @@ class STGP_Trader(Trader):
             self.profit_since_evolution += improvement
 
             # for logging: customer price, trans price, attemted improvement, actual improvement, msg
-            new_order_data = Order_Data(self.limit, msg.trns[0]["Price"], self.price, improvement, msg)
+            posted_improvement = abs(self.lastquote.price - self.limit)
+            new_order_data = Order_Data(self.limit, msg.trns[0]["Price"], 
+                                        posted_improvement, improvement, msg)
             self.current_gen_data.transactions.append(new_order_data)
         
         super().bookkeep(msg, time, verbose)
