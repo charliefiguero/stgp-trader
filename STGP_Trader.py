@@ -100,7 +100,7 @@ class STGP_Trader(Trader):
             if verbose:
                 print(f"trader: {self.tid}, limit price: {self.limit}, improvement found: {improvement}")
 
-            print(f"trader: {self.tid}, limit price: {self.limit}, improvement found: {improvement}")
+            # print(f"trader: {self.tid}, limit price: {self.limit}, improvement found: {improvement}")
 
             # buys for less, sells for more
             if self.job == 'Bid':

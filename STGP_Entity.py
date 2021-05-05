@@ -66,7 +66,7 @@ class STGP_Entity(Entity):
         self.traders_count = 0
 
         self.duration = duration
-        self.NUM_GENS = 10
+        self.NUM_GENS = 20
         self.EVAL_TIME = duration / self.NUM_GENS # evolves the pop every x seconds
         self.last_update = 0
 
@@ -143,6 +143,9 @@ class STGP_Entity(Entity):
         CXPB, MUTPB, NGEN = 0.5, 0.2, 40
 
         print(f"Evolving population for {self.lei}, generation: {int(time / self.EVAL_TIME)}")
+
+        profits = [tr.get_profit(time) for tr in self.traders.values()]
+        print(sum(profits))
         
         # Evaluate the entire population
         fitnesses = self.evaluate_population(time)
@@ -197,6 +200,7 @@ class STGP_Entity(Entity):
         # log new exprs
         self.prv_exprs.append(self.exprs.copy())
 
+        print('finished evolving\n')
         return self.exprs
 
     def update_trader_expr(self, time):

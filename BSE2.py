@@ -135,11 +135,11 @@ def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specific
 
     ### Initialise STGP traders ###
 
-    num_buyers_per_entity = 10
-    starting_balance = 100
+    num_buyers_per_entity = 100
+    trader_starting_balance = 100
 
     for stgpe in stgp_entities:
-        stgpe.init_traders(num_buyers_per_entity, num_buyers_per_entity * starting_balance, 0)
+        stgpe.init_traders(num_buyers_per_entity, trader_starting_balance, 0)
         n_buyers += num_buyers_per_entity
         traders.update(stgpe.traders)
 
@@ -514,7 +514,7 @@ if __name__ == "__main__":
     verbose = False
 
     start_time = 0.0
-    end_time = 1000.0
+    end_time = 100000.0
 
 
     # end_time=25200 # 7 hours x 60 min x 60 sec /
@@ -535,8 +535,9 @@ if __name__ == "__main__":
                    'timemode': 'drip-poisson'}
     # 'timemode': 'periodic'}
 
-    buyers_spec = [('GVWY', 10)]
-    sellers_spec = buyers_spec
+    # buyers_spec = [('ZIP', 100)]
+    buyers_spec = [('ZIP', 1)]
+    sellers_spec = [('ZIP', 100)]
     traders_spec = {'sellers': sellers_spec, 'buyers': buyers_spec}
 
     total_traders = 0
