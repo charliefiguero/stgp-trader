@@ -15,7 +15,7 @@ module load languages/anaconda3/2018.12
 
 pip install deap --user
 pip install jsonpickle --user
-pip install pygraphviz --user
+# pip install pygraphviz --user
 pip install typing --user
 
 python BSE2.py
