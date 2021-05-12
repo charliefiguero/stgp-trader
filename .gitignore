@@ -8,6 +8,9 @@ output.txt
 stgp_csvs/improvements/*
 !stgp_csvs/improvements/.gitkeep
 
+networth_plots/*
+!networth_plots/.gitkeep
+
 test.py
 slurm*
 stgp_diss.out

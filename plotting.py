@@ -31,8 +31,9 @@ def plot_gen_profits(gen_profits):
     fig, ax = plt.subplots()
     ax.set_title('Generational Profits for STGP_Entity')
     sns.set_theme()
-    sns.lineplot(data=gen_profits, x=gen_profits.index, y=gen_profits, ax=ax)
-    plt.show()
+    output = sns.lineplot(data=gen_profits, x=gen_profits.index, y=gen_profits, ax=ax)
+    output.get_figure().savefig('networth_plots/output.png')
+    # plt.show()
 
 if __name__ == "__main__":
     list_of_files = glob.glob('stgp_csvs/improvements/*') # * means all if need specific format then *.csv
@@ -49,7 +50,6 @@ if __name__ == "__main__":
     # plotting
     print(gen_profits)
     plot_gen_profits(gen_profits)
-
 
     # print(traders_gen_profits(exp_df['traders_data'][0]))
     # print(gen_profits(exp_df['traders_data']))

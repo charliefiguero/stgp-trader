@@ -515,7 +515,7 @@ if __name__ == "__main__":
     verbose = False
 
     start_time = 0.0
-    end_time = 100000.0
+    end_time = 1000.0
 
 
     # end_time=25200 # 7 hours x 60 min x 60 sec /
