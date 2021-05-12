@@ -92,8 +92,8 @@ class STGP_Trader(Trader):
             improvement = 0
             
             # calculate improvement on customer order via STGP function
-            if self.ema != None:
-                improvement = self.trading_func(self.ema)
+            if self.ema != None and lob['bids']['bestp'] != None and lob['asks']['bestp'] != None:
+                improvement = self.trading_func(self.ema, lob['bids']['bestp'], lob['asks']['bestp'], time, countdown)
             # resets negative improvements
             if improvement < 0:
                 improvement = 0

@@ -109,6 +109,7 @@ def trade_stats(expid, traders, dumpfile, time, lob):
 # returns tuple (n_buyers, n_sellers)
 # optionally shuffles the pack of buyers and the pack of sellers
 def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specification, traders, shuffle, verbose):
+# def populate_market(entities, stgp_entities, traders_specification, traders, shuffle, verbose): # removed for bc4
 
     def shuffle_traders(ttype_char, n, shuff_traders):
         for swap in range(n):
@@ -135,7 +136,7 @@ def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specific
 
     ### Initialise STGP traders ###
 
-    num_buyers_per_entity = 100
+    num_buyers_per_entity = 10
     trader_starting_balance = 100
 
     for stgpe in stgp_entities:
@@ -514,7 +515,7 @@ if __name__ == "__main__":
     verbose = False
 
     start_time = 0.0
-    end_time = 100000.0
+    end_time = 10000.0
 
 
     # end_time=25200 # 7 hours x 60 min x 60 sec /
@@ -536,8 +537,8 @@ if __name__ == "__main__":
     # 'timemode': 'periodic'}
 
     # buyers_spec = [('ZIP', 100)]
-    buyers_spec = [('ZIP', 1)]
-    sellers_spec = [('ZIP', 100)]
+    buyers_spec = [('ZIP', 10)]
+    sellers_spec = [('ZIP', 10)]
     traders_spec = {'sellers': sellers_spec, 'buyers': buyers_spec}
 
     total_traders = 0

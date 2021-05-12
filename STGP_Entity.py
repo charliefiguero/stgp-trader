@@ -38,7 +38,7 @@ def draw_expr(expr, name=None):
         n.attr["label"] = labels[i]
 
     # saves to tree.pdf
-    now = datetime.datetime.now()
+    now = datetime.now()
     # print(f"Current time: {now}\n")
     if not name == None:
         g.draw(f"trees/tree {name}.pdf")
@@ -72,8 +72,12 @@ class STGP_Entity(Entity):
 
     def create_deap_toolbox_and_pset(self):
         # initialise pset
-        pset = gp.PrimitiveSetTyped("main", [float], float)
+        pset = gp.PrimitiveSetTyped("main", [float, float, float, float, float], float)
         pset.renameArguments(ARG0="ema_ind")
+        pset.renameArguments(ARG1="best_ask")
+        pset.renameArguments(ARG2="best_bid")
+        pset.renameArguments(ARG3="time")
+        pset.renameArguments(ARG4="countdown")
         # integer operations
         pset.addPrimitive(operator.add, [float, float], float)
         pset.addPrimitive(operator.sub, [float, float], float)
@@ -159,25 +163,25 @@ class STGP_Entity(Entity):
         for child1, child2 in zip(offspring[::2], offspring[1::2]):
             if random.random() < CXPB:
                 # print(f"about to mate: Child1: {child1}   Child2: {child2}")
-                # draw_expr(child1, "child1 pre")
-                # draw_expr(child2, "child2 pre")
+                draw_expr(child1, "child1 pre")
+                draw_expr(child2, "child2 pre")
                 self.toolbox.mate(child1, child2)
                 del child1.fitness.values
                 del child2.fitness.values
                 # print(f"mated: Child1: {child1}   Child2: {child2}")
-                # draw_expr(child1, "child1 post")
-                # draw_expr(child2, "child2 post")
+                draw_expr(child1, "child1 post")
+                draw_expr(child2, "child2 post")
                 
         print()
 
         for mutant in offspring:
             if random.random() < MUTPB:
                 # print(f"about to mutate: {mutant} \n")
-                # draw_expr(mutant, f"tree pre {mutant}")
+                draw_expr(mutant, f"tree pre {mutant}")
                 self.toolbox.mutate(mutant)
                 del mutant.fitness.values
                 # print(f"mutant: {mutant}")
-                # draw_expr(mutant, f"tree post {mutant}")
+                draw_expr(mutant, f"tree post {mutant}")
 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
