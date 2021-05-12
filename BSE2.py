@@ -108,7 +108,8 @@ def trade_stats(expid, traders, dumpfile, time, lob):
 # create a bunch of traders from traders_specification, links them to the relevant entities
 # returns tuple (n_buyers, n_sellers)
 # optionally shuffles the pack of buyers and the pack of sellers
-def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specification, traders, shuffle, verbose):
+# def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specification, traders, shuffle, verbose):
+def populate_market(entities, stgp_entities, traders_specification, traders, shuffle, verbose): # removed for bc4
 
     def shuffle_traders(ttype_char, n, shuff_traders):
         for swap in range(n):

@@ -9,3 +9,5 @@ stgp_csvs/improvements/*
 !stgp_csvs/improvements/.gitkeep
 
 test.py
+slurm*
+stgp_diss.out
