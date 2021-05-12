@@ -515,7 +515,7 @@ if __name__ == "__main__":
     verbose = False
 
     start_time = 0.0
-    end_time = 10000.0
+    end_time = 100000.0
 
 
     # end_time=25200 # 7 hours x 60 min x 60 sec /
@@ -537,8 +537,8 @@ if __name__ == "__main__":
     # 'timemode': 'periodic'}
 
     # buyers_spec = [('ZIP', 100)]
-    buyers_spec = [('ZIP', 10)]
-    sellers_spec = [('ZIP', 10)]
+    buyers_spec = [('ZIP', 1)]
+    sellers_spec = [('ZIP', 200)]
     traders_spec = {'sellers': sellers_spec, 'buyers': buyers_spec}
 
     total_traders = 0

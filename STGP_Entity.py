@@ -13,7 +13,7 @@ import jsonpickle
 import pprint
 
 from deap import gp, creator, base, tools, algorithms
-import pygraphviz as pgv
+# import pygraphviz as pgv
 
 from BSE2_msg_classes import Assignment, Order, ExchMsg
 from BSE2_trader_agents import Trader
@@ -66,7 +66,7 @@ class STGP_Entity(Entity):
         self.traders_count = 0
 
         self.duration = duration
-        self.NUM_GENS = 20
+        self.NUM_GENS = 100
         self.EVAL_TIME = duration / self.NUM_GENS # evolves the pop every x seconds
         self.last_update = 0
 
@@ -278,3 +278,5 @@ if __name__ == "__main__":
     e.init_traders(10, 100, 0.0)
 
     list(e.traders.values())[0].get_gen_profits()
+    print('hello')
+
