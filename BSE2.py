@@ -136,7 +136,7 @@ def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specific
 
     ### Initialise STGP traders ###
 
-    num_buyers_per_entity = 10
+    num_buyers_per_entity = 200
     trader_starting_balance = 100
 
     for stgpe in stgp_entities:
