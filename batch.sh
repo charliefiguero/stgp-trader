@@ -19,7 +19,6 @@ pip install jsonpickle --user
 pip install typing --user
 
 python BSE2.py
-python plotting.py
 
 echo "done"
 
