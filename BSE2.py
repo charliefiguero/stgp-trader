@@ -61,6 +61,7 @@ from BSE2_exchange import Exchange
 from BSE2_customer_orders import customer_orders
 from BSE2_trader_agents import trader_create
 from BSE2_Entity import Entity
+import experiment_setup
 
 from STGP_Entity import STGP_Entity
 
@@ -136,12 +137,13 @@ def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specific
 
     ### Initialise STGP traders ###
 
-    num_buyers_per_entity = 200
-    trader_starting_balance = 100
+    num_traders_entity = experiment_setup.NUM_TRADERS_PER_ENTITY
+    trader_starting_balance = experiment_setup.STGP_TRADER_STARTING_BALANCE
+    start_time = 0
 
     for stgpe in stgp_entities:
-        stgpe.init_traders(num_buyers_per_entity, trader_starting_balance, 0)
-        n_buyers += num_buyers_per_entity
+        stgpe.init_traders(num_traders_entity, trader_starting_balance, start_time)
+        n_buyers += num_traders_entity
         traders.update(stgpe.traders)
 
     ###############################
@@ -515,7 +517,7 @@ if __name__ == "__main__":
     verbose = False
 
     start_time = 0.0
-    end_time = 100000.0
+    end_time = experiment_setup.END_TIME
 
 
     # end_time=25200 # 7 hours x 60 min x 60 sec /
@@ -537,8 +539,8 @@ if __name__ == "__main__":
     # 'timemode': 'periodic'}
 
     # buyers_spec = [('ZIP', 100)]
-    buyers_spec = [('ZIP', 1)]
-    sellers_spec = [('ZIP', 200)]
+    buyers_spec = [('GVWY', 1)]
+    sellers_spec = [('GVWY', 51)]
     traders_spec = {'sellers': sellers_spec, 'buyers': buyers_spec}
 
     total_traders = 0

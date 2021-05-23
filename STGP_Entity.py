@@ -19,6 +19,7 @@ from BSE2_msg_classes import Assignment, Order, ExchMsg
 from BSE2_trader_agents import Trader
 from BSE2_Entity import Entity
 from STGP_Trader import STGP_Trader
+import experiment_setup
 
 
 def if_then_else(inputed, output1, output2):
@@ -60,25 +61,27 @@ class STGP_Entity(Entity):
         self.exprs = [] # gp trees that are evolved
 
         # for logging
+        self.stats = tools.Statistics(key=lambda ind: ind.fitness.values)
         self.prv_exprs = []
 
         self.traders = {} # traders are passed compiled exprs
         self.traders_count = 0
 
         self.duration = duration
-        self.NUM_GENS = 100
+        self.NUM_GENS = experiment_setup.NUM_GENS
         self.EVAL_TIME = duration / self.NUM_GENS # evolves the pop every x seconds
         self.last_update = 0
 
     def create_deap_toolbox_and_pset(self):
         # initialise pset
         pset = gp.PrimitiveSetTyped("main", [float, float, float, float, float], float)
+        # inputs to the tree
         pset.renameArguments(ARG0="ema_ind")
         pset.renameArguments(ARG1="best_ask")
         pset.renameArguments(ARG2="best_bid")
         pset.renameArguments(ARG3="time")
         pset.renameArguments(ARG4="countdown")
-        # integer operations
+        # float operations
         pset.addPrimitive(operator.add, [float, float], float)
         pset.addPrimitive(operator.sub, [float, float], float)
         # conditional operations 
@@ -109,6 +112,10 @@ class STGP_Entity(Entity):
         toolbox.register("mate", gp.cxOnePoint)
         toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
         toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
+        # bloat control
+        # max height == 17 (as specificed by Koza, 1989)
+        toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
+        toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
 
         return pset, toolbox
 
@@ -149,7 +156,7 @@ class STGP_Entity(Entity):
         print(f"Evolving population for {self.lei}, generation: {int(time / self.EVAL_TIME)}")
 
         profits = [tr.get_profit(time) for tr in self.traders.values()]
-        print(sum(profits))
+        print(f'generational profits: {sum(profits)}')
         
         # Evaluate the entire population
         fitnesses = self.evaluate_population(time)
