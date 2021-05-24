@@ -66,7 +66,7 @@ class STGP_Trader(Trader):
         return self.profit_since_evolution
 
     def reset_gen_profits(self):
-        """ Called after the expr has been updated due to evolution. """
+        """ Called after the expr has been updated due to evolution. This is necessary to evaluate a generation. """
         self.generational_profits.append(self.profit_since_evolution)
         self.profit_since_evolution = 0
         self.current_gen += 1

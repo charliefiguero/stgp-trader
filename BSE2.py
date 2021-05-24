@@ -49,9 +49,10 @@ import sys
 # import math
 import random
 # import csv
-# from datetime import datetime
+from datetime import datetime
 from typing import List
 from time import sleep
+from operator import attrgetter
 
 # import matplotlib.pyplot as plt
 # import numpy as np
@@ -64,6 +65,7 @@ from BSE2_Entity import Entity
 import experiment_setup
 
 from STGP_Entity import STGP_Entity
+from STGP_Entity import draw_expr
 
 # from BSE2_unittests import test_all
 # from BSE2_dev import proc_OXO proc_ICE
@@ -590,11 +592,26 @@ if __name__ == "__main__":
                        traders_spec, order_sched, summary_data_file, tape_data_file,
                        blotter_data_file, False)
 
-    # stgp_e.print_t_gen_profits()
     stgp_e.total_gen_profits()
     stgp_e.write_total_gen_profits()
-    print('get records...')
-    print(stgp_e.gen_records)
     stgp_e.write_gen_records()
+    stgp_e.write_best_exprs()
+    stgp_e.write_hof()
 
+
+
+    hof_list = stgp_e.hall_of_fame.items
+    item = hof_list[0]
+    print(item.__dict__)
+    string_item = str(item)
+
+    from deap import gp
+    
+    newer = gp.PrimitiveTree.from_string(string_item, stgp_e.pset)
+    print(newer)
+    print(type(newer))
+
+    print(hof_list[0])
+
+    
     print('\n Experiment Finished')

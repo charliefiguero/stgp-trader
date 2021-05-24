@@ -11,10 +11,11 @@ from time import sleep
 from statistics import mean, stdev
 import jsonpickle
 import pprint
-import json
+from operator import attrgetter
+from copy import copy
 
 from deap import gp, creator, base, tools, algorithms
-# import pygraphviz as pgv
+import pygraphviz as pgv
 
 from BSE2_msg_classes import Assignment, Order, ExchMsg
 from BSE2_trader_agents import Trader
@@ -70,6 +71,7 @@ class STGP_Entity(Entity):
         self.gen_records = []
         self.hall_of_fame = tools.HallOfFame(1)
         self.prv_exprs = []
+        self.best_exprs = [] # I don't know why hall of fame doesn't save as strings? refactor this
 
         self.traders = {} # traders are passed compiled exprs
         self.traders_count = 0
@@ -160,8 +162,6 @@ class STGP_Entity(Entity):
         return map(lambda x: x.fitness.values[0], self.exprs)
 
     def evolve_population(self, time):
-        CXPB, MUTPB= 0.5, 0.2
-
         print(f"Evolving population for {self.lei}, generation: {int(time / self.EVAL_TIME)}")
 
         profits = [tr.get_profit(time) for tr in self.traders.values()]
@@ -169,9 +169,14 @@ class STGP_Entity(Entity):
         
         # Evaluate the entire population
         fitnesses = self.evaluate_population(time)
-
+        
         # update the hall of fame
         self.hall_of_fame.update(self.exprs)
+        best_ind = sorted(self.exprs, key=attrgetter('fitness.values'), reverse=True)[0]
+        print('best_ind from stgp enittiy', best_ind, 'type:', type(best_ind))
+        # print('best ind type:', type(best_ind))
+        # best_fitness = best_ind.fitness.values[0]
+        self.best_exprs.append(copy(best_ind)) # TODO: refactor to just use the hall of fame?
 
         # statistics
         record = self.stats.compile(self.exprs)
@@ -186,10 +191,11 @@ class STGP_Entity(Entity):
         # Apply crossover and mutation on the offspring
         # [::2] means nothing for first and second argument and jump by 2.
         for child1, child2 in zip(offspring[::2], offspring[1::2]):
-            if random.random() < CXPB:
+            if random.random() < experiment_setup.CXPB:
                 # print(f"about to mate: Child1: {child1}   Child2: {child2}")
                 # draw_expr(child1, "child1 pre")
                 # draw_expr(child2, "child2 pre")
+                # print(child1)
                 self.toolbox.mate(child1, child2)
                 del child1.fitness.values
                 del child2.fitness.values
@@ -198,7 +204,7 @@ class STGP_Entity(Entity):
                 # draw_expr(child2, "child2 post")
                 
         for mutant in offspring:
-            if random.random() < MUTPB:
+            if random.random() < experiment_setup.MUTPB:
                 # print(f"about to mutate: {mutant} \n")
                 # draw_expr(mutant, f"tree pre {mutant}")
                 self.toolbox.mutate(mutant)
@@ -246,6 +252,26 @@ class STGP_Entity(Entity):
             self.evolve_population(time)
             self.last_update = time
 
+    def total_gen_profits(self):
+        num_gen = len(list(self.traders.values())[0].generational_profits) + 1
+
+        all_profits = []
+        for i in range(num_gen-1):
+            gen_profits = []
+            for t in self.traders.values():
+                gen_profits.append(t.generational_profits[i])
+            all_profits.append(gen_profits)
+
+        final_gen_profits = []
+        for t in self.traders.values():
+            final_gen_profits.append(t.profit_since_evolution)
+
+        all_profits.append(final_gen_profits)
+
+        output = [(count, sum(x)) for count, x in enumerate(all_profits)]
+        print(f"total gen profits...\n{output}\n")
+        return output
+
     def write_total_gen_profits(self):
         """ called at the end of experiment """
 
@@ -266,6 +292,17 @@ class STGP_Entity(Entity):
         now = datetime.now()
         with open('stgp_csvs/gen_records/' + str(now), 'w') as outfile:
             outfile.write(jsonpickle.encode(self.gen_records, indent=4))
+
+    def write_best_exprs(self):
+        now = datetime.now()
+        with open('stgp_csvs/best_exprs/' + str(now), 'w') as outfile:
+            outfile.write(jsonpickle.encode(self.best_exprs, indent=4))
+
+    def write_hof(self):
+        now = datetime.now()
+        with open('stgp_csvs/hall_of_fame/' + str(now), 'w') as outfile:
+            for tree in self.hall_of_fame:
+                outfile.write(str(tree))
 
 
 if __name__ == "__main__":

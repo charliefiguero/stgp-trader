@@ -6,6 +6,9 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from datetime import datetime
+import pygraphviz as pgv
+from deap import gp
+
 
 
 def read_pickle(fname):
@@ -29,6 +32,17 @@ def gen_profits(all_traders):
     return pd.Series(gen_profits)
 
 def plot_gen_profits(gen_profits, title = None):
+    list_of_files = glob.glob('stgp_csvs/improvements/*') # * means all if need specific format then *.csv
+    latest_file = max(list_of_files, key=os.path.getctime)
+    print(f'reading file: ', latest_file, '\n')
+    
+    experiment_data = read_pickle(latest_file)
+    exp_df = pd.DataFrame.from_dict(experiment_data)
+
+    # calculate data
+    gen_profits = gen_profits(exp_df['traders_data'])
+
+    # plotting
     fig, ax = plt.subplots()
     ax.set_title('Generational Profits for STGP_Entity')
     ax.set_xlabel('Generation')
@@ -58,8 +72,7 @@ def plot_mean_profits(traders, title = None):
     output.get_figure().savefig(f'networth_plots/{title}.png')
     # plt.show()
 
-
-if __name__ == "__main__":
+def plot_stats():
     list_of_files = glob.glob('stgp_csvs/gen_records/*') # * means all if need specific format then *.csv
     latest_file = max(list_of_files, key=os.path.getctime)
     print(f'reading file: ', latest_file, '\n')
@@ -83,6 +96,90 @@ if __name__ == "__main__":
 
     exp_df.plot(x='gen_num', y='min', kind='line')
     plt.show()
+
+def draw_expr(expr, name=None):
+    nodes, edges, labels = gp.graph(expr)
+
+    ### Graphviz Section ###
+    g = pgv.AGraph()
+    g.add_nodes_from(nodes)
+    g.add_edges_from(edges)
+    g.layout(prog="dot")
+
+    for i in nodes:
+        n = g.get_node(i)
+        n.attr["label"] = labels[i]
+
+    # saves to tree.pdf
+    now = datetime.now()
+    # print(f"Current time: {now}\n")
+    if not name == None:
+        g.draw(f"trees/tree {name}.pdf")
+    else:
+        g.draw(f"trees/tree {now}.pdf")
+
+def plot_best_exps():
+    list_of_files = glob.glob('stgp_csvs/best_exprs/*') # * means all if need specific format then *.csv
+    latest_file = max(list_of_files, key=os.path.getctime)
+    print(f'reading file: ', latest_file, '\n')
+
+    experiment_data = read_pickle(latest_file)
+    exp_df = pd.DataFrame.from_dict(experiment_data)
+    # exp_df.insert(0, 'gen_num', exp_df.index.tolist())
+    # exp_df['max'] = list(map(lambda x : x[0], exp_df['max']))
+    # exp_df['min'] = list(map(lambda x : x[0], exp_df['min']))
+
+    print(exp_df)
+
+def plot_hof():
+    list_of_files = glob.glob('stgp_csvs/best_exprs/*') # * means all if need specific format then *.csv
+    latest_file = max(list_of_files, key=os.path.getctime)
+    print(f'reading file: ', latest_file, '\n')
+
+    experiment_data = read_pickle(latest_file)
+    thing = experiment_data
+    print(thing)
+
+
+    # test = experiment_data[0]['py/seq'][0]
+    # sdfa = gp.PrimitiveTree(test)
+    # print(sdfa)
+
+    # print(experiment_data[0]['py/seq'][0])
+
+    # first = 
+
+
+if __name__ == "__main__":
+    # plot_stats()
+    plot_hof()
+
+
+
+    
+    # list_of_files = glob.glob('stgp_csvs/gen_records/*') # * means all if need specific format then *.csv
+    # latest_file = max(list_of_files, key=os.path.getctime)
+    # print(f'reading file: ', latest_file, '\n')
+
+    # experiment_data = read_pickle(latest_file)
+    # exp_df = pd.DataFrame.from_dict(experiment_data)
+    # exp_df.insert(0, 'gen_num', exp_df.index.tolist())
+    # exp_df['max'] = list(map(lambda x : x[0], exp_df['max']))
+    # exp_df['min'] = list(map(lambda x : x[0], exp_df['min']))
+
+    # print(exp_df)
+
+    # exp_df.plot(x='gen_num', y='avg', kind='line')
+    # plt.show()
+
+    # exp_df.plot(x='gen_num', y='std', kind='line')
+    # plt.show()
+
+    # exp_df.plot(x='gen_num', y='max', kind='line')
+    # plt.show()
+
+    # exp_df.plot(x='gen_num', y='min', kind='line')
+    # plt.show()
 
 
 
