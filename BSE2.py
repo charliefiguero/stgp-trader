@@ -65,7 +65,7 @@ from BSE2_Entity import Entity
 import experiment_setup
 
 from STGP_Entity import STGP_Entity
-from STGP_Entity import draw_expr
+# from STGP_Entity import draw_expr
 
 # from BSE2_unittests import test_all
 # from BSE2_dev import proc_OXO proc_ICE
@@ -605,13 +605,13 @@ if __name__ == "__main__":
     print(item.__dict__)
     string_item = str(item)
 
-    from deap import gp
+    # from deap import gp
     
-    newer = gp.PrimitiveTree.from_string(string_item, stgp_e.pset)
-    print(newer)
-    print(type(newer))
+    # newer = gp.PrimitiveTree.from_string(string_item, stgp_e.pset)
+    # print(newer)
+    # print(type(newer))
 
-    print(hof_list[0])
+    # print(hof_list[0])
 
     
     print('\n Experiment Finished')
