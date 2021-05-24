@@ -117,40 +117,6 @@ def draw_expr(expr, name=None):
     else:
         g.draw(f"trees/tree {now}.pdf")
 
-def plot_best_exps():
-    list_of_files = glob.glob('stgp_csvs/best_exprs/*') # * means all if need specific format then *.csv
-    latest_file = max(list_of_files, key=os.path.getctime)
-    print(f'reading file: ', latest_file, '\n')
-
-    experiment_data = read_pickle(latest_file)
-    exp_df = pd.DataFrame.from_dict(experiment_data)
-    # exp_df.insert(0, 'gen_num', exp_df.index.tolist())
-    # exp_df['max'] = list(map(lambda x : x[0], exp_df['max']))
-    # exp_df['min'] = list(map(lambda x : x[0], exp_df['min']))
-
-    print(exp_df)
-
-def draw_expr(expr, name=None):
-    nodes, edges, labels = gp.graph(expr)
-
-    ### Graphviz Section ###
-    g = pgv.AGraph()
-    g.add_nodes_from(nodes)
-    g.add_edges_from(edges)
-    g.layout(prog="dot")
-
-    for i in nodes:
-        n = g.get_node(i)
-        n.attr["label"] = labels[i]
-
-    # saves to tree.pdf
-    now = datetime.now()
-    # print(f"Current time: {now}\n")
-    if not name == None:
-        g.draw(f"trees/tree {name}.pdf")
-    else:
-        g.draw(f"trees/tree {now}.pdf")
-
 def plot_hof():
     list_of_files = glob.glob('stgp_csvs/hall_of_fame/*') # * means all if need specific format then *.csv
     latest_file = max(list_of_files, key=os.path.getctime)

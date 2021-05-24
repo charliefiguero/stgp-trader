@@ -1,6 +1,5 @@
 import random
 import operator
-import datetime
 from datetime import datetime
 from statistics import mean, stdev
 import jsonpickle

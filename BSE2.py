@@ -45,7 +45,6 @@
 
 import sys
 import random
-from datetime import datetime
 from typing import List
 from time import sleep
 
