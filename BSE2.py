@@ -43,19 +43,11 @@
 #
 # NB this code has been written to be readable/intelligible, not efficient!
 
-# could import pylab here for graphing etc
-
 import sys
-# import math
 import random
-# import csv
 from datetime import datetime
 from typing import List
 from time import sleep
-from operator import attrgetter
-
-# import matplotlib.pyplot as plt
-# import numpy as np
 
 # from BSE2_msg_classes import Assignment, Order, ExchMsg
 from BSE2_exchange import Exchange
@@ -65,7 +57,6 @@ from BSE2_Entity import Entity
 import experiment_setup
 
 from STGP_Entity import STGP_Entity
-# from STGP_Entity import draw_expr
 
 # from BSE2_unittests import test_all
 # from BSE2_dev import proc_OXO proc_ICE
@@ -593,24 +584,11 @@ if __name__ == "__main__":
                        blotter_data_file, False)
 
 
-
-    hof_list = stgp_e.hall_of_fame.items
-    item = hof_list[0]
-    print(item.__dict__)
-    string_item = str(item)
-
-    from deap import gp
-
-    print(type(item))
-    newer = gp.PrimitiveTree(item)
-    print(type(newer))
-    print(newer)
-    
-    # newer = gp.PrimitiveTree.from_string(string_item, stgp_e.pset)
-    # print(newer)
-    # print(type(newer))
-
-    # print(hof_list[0])
+    # write stgp stats
+    stgp_e.total_gen_profits()
+    stgp_e.write_total_gen_profits()
+    stgp_e.write_gen_records()
+    stgp_e.write_hof()
 
     
     print('\n Experiment Finished')

@@ -161,16 +161,6 @@ def plot_hof():
     draw_expr(thawed_hof)
 
 
-
-    # test = experiment_data[0]['py/seq'][0]
-    # sdfa = gp.PrimitiveTree(test)
-    # print(sdfa)
-
-    # print(experiment_data[0]['py/seq'][0])
-
-    # first = 
-
-
 if __name__ == "__main__":
     # plot_stats()
     plot_hof()

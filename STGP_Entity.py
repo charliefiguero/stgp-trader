@@ -1,24 +1,13 @@
-import sys
-import os
-import inspect
 import random
 import operator
-import numpy
 import datetime
 from datetime import datetime
-from typing import NewType
-from time import sleep
 from statistics import mean, stdev
 import jsonpickle
-import pprint
 from operator import attrgetter
-from copy import copy
 
 from deap import gp, creator, base, tools, algorithms
-import pygraphviz as pgv
 
-from BSE2_msg_classes import Assignment, Order, ExchMsg
-from BSE2_trader_agents import Trader
 from BSE2_Entity import Entity
 from STGP_Trader import STGP_Trader
 import experiment_setup
@@ -50,7 +39,6 @@ class STGP_Entity(Entity):
         self.gen_records = []
         self.hall_of_fame = tools.HallOfFame(1)
         self.prv_exprs = []
-        self.best_exprs = [] # I don't know why hall of fame doesn't save as strings? refactor this
 
         self.traders = {} # traders are passed compiled exprs
         self.traders_count = 0
@@ -153,9 +141,6 @@ class STGP_Entity(Entity):
         self.hall_of_fame.update(self.exprs)
         best_ind = sorted(self.exprs, key=attrgetter('fitness.values'), reverse=True)[0]
         print('best_ind from stgp enittiy', best_ind, 'type:', type(best_ind))
-        # print('best ind type:', type(best_ind))
-        # best_fitness = best_ind.fitness.values[0]
-        self.best_exprs.append(copy(best_ind)) # TODO: refactor to just use the hall of fame?
 
         # statistics
         record = self.stats.compile(self.exprs)
@@ -172,24 +157,18 @@ class STGP_Entity(Entity):
         for child1, child2 in zip(offspring[::2], offspring[1::2]):
             if random.random() < experiment_setup.CXPB:
                 # print(f"about to mate: Child1: {child1}   Child2: {child2}")
-                # draw_expr(child1, "child1 pre")
-                # draw_expr(child2, "child2 pre")
                 # print(child1)
                 self.toolbox.mate(child1, child2)
                 del child1.fitness.values
                 del child2.fitness.values
-                # print(f"mated: Child1: {child1}   Child2: {child2}")
-                # draw_expr(child1, "child1 post")
-                # draw_expr(child2, "child2 post")
+                # print(f"mated: Child1: {child1}   Child2: {child2}")s
                 
         for mutant in offspring:
             if random.random() < experiment_setup.MUTPB:
                 # print(f"about to mutate: {mutant} \n")
-                # draw_expr(mutant, f"tree pre {mutant}")
                 self.toolbox.mutate(mutant)
                 del mutant.fitness.values
                 # print(f"mutant: {mutant}")
-                # draw_expr(mutant, f"tree post {mutant}")
 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
@@ -202,8 +181,6 @@ class STGP_Entity(Entity):
         # The population is entirely replaced by the offspring
         self.exprs[:] = offspring
         self.update_trader_expr(time)
-
-        # sleep(1)
 
         # reset trader stats for profit eval 
         for trader in self.traders.values():
