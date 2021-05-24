@@ -134,11 +134,6 @@ class STGP_Trader(Trader):
         
         super().bookkeep(msg, time, verbose)
 
-    def print_gen_profits(self):
-        print(f"profits for trader: {self.tid}")
-        for count, p in enumerate(self.generational_profits):
-            print(f"gen: {count}, profit: {p}")
-
     def get_gen_profits(self):
         """ to be called at the end of experiment """
         ps = self.generational_profits

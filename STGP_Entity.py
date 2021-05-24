@@ -68,6 +68,7 @@ class STGP_Entity(Entity):
         self.stats.register("min", min)
         self.stats.register("max", max)
         self.gen_records = []
+        self.hall_of_fame = tools.HallOfFame(1)
         self.prv_exprs = []
 
         self.traders = {} # traders are passed compiled exprs
@@ -156,8 +157,6 @@ class STGP_Entity(Entity):
         """ calculate fitnesses for the population """
         for expr in self.exprs:
             expr.fitness.values = (self.evaluate_expr(expr, time), )
-
-        # return map(lambda x: self.toolbox.evaluate(x, time), self.exprs)
         return map(lambda x: x.fitness.values[0], self.exprs)
 
     def evolve_population(self, time):
@@ -170,6 +169,9 @@ class STGP_Entity(Entity):
         
         # Evaluate the entire population
         fitnesses = self.evaluate_population(time)
+
+        # update the hall of fame
+        self.hall_of_fame.update(self.exprs)
 
         # statistics
         record = self.stats.compile(self.exprs)
@@ -243,32 +245,6 @@ class STGP_Entity(Entity):
         if time - self.last_update > self.EVAL_TIME:
             self.evolve_population(time)
             self.last_update = time
-
-    def print_t_gen_profits(self):
-        for t in self.traders.values():
-            t.print_gen_profits()
-
-    def total_gen_profits(self):
-        num_gen = len(list(self.traders.values())[0].generational_profits) + 1
-
-        all_profits = []
-        for i in range(num_gen-1):
-            gen_profits = []
-            for t in self.traders.values():
-                gen_profits.append(t.generational_profits[i])
-            all_profits.append(gen_profits)
-
-        final_gen_profits = []
-        for t in self.traders.values():
-            final_gen_profits.append(t.profit_since_evolution)
-
-        all_profits.append(final_gen_profits)
-
-        print(f"all profits...\n{all_profits}\n")
-
-        output = [(count, sum(x)) for count, x in enumerate(all_profits)]
-        print(f"output...\n{output}\n")
-        return output
 
     def write_total_gen_profits(self):
         """ called at the end of experiment """
