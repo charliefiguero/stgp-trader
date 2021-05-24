@@ -288,12 +288,8 @@ class STGP_Entity(Entity):
 
     def write_gen_records(self):
         now = datetime.now()
-        p = jsonpickle.Pickler()
         with open('stgp_csvs/gen_records/' + str(now), 'w') as outfile:
-            for record in self.gen_records:
-                p_record = p.encode(record)
-                outfile.write(p_record)
-                # outfile.write(json.dumps(record)+'\n')
+            outfile.write(jsonpickle.encode(self.gen_records, indent=4))
 
 
 if __name__ == "__main__":

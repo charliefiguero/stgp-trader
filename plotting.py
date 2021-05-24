@@ -60,7 +60,29 @@ def plot_mean_profits(traders, title = None):
 
 
 if __name__ == "__main__":
-    read_pickle
+    list_of_files = glob.glob('stgp_csvs/gen_records/*') # * means all if need specific format then *.csv
+    latest_file = max(list_of_files, key=os.path.getctime)
+    print(f'reading file: ', latest_file, '\n')
+
+    experiment_data = read_pickle(latest_file)
+    exp_df = pd.DataFrame.from_dict(experiment_data)
+    exp_df.insert(0, 'gen_num', exp_df.index.tolist())
+    exp_df['max'] = list(map(lambda x : x[0], exp_df['max']))
+    exp_df['min'] = list(map(lambda x : x[0], exp_df['min']))
+
+    print(exp_df)
+
+    exp_df.plot(x='gen_num', y='avg', kind='line')
+    plt.show()
+
+    exp_df.plot(x='gen_num', y='std', kind='line')
+    plt.show()
+
+    exp_df.plot(x='gen_num', y='max', kind='line')
+    plt.show()
+
+    exp_df.plot(x='gen_num', y='min', kind='line')
+    plt.show()
 
 
 
