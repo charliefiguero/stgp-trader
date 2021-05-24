@@ -590,4 +590,4 @@ if __name__ == "__main__":
     stgp_e.write_hof()
 
     
-    print('\n Experiment Finished')
+    print('\nExperiment Finished')

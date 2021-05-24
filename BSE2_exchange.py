@@ -918,12 +918,12 @@ class Exchange(Orderbook):
 
     def dump_tape(self, session_id, dumpfile, tmode):
 
-        print('Dumping tape s.tape=')
-        for ti in self.tape:
-            print('%s' % ti)
+        # print('Dumping tape s.tape=')
+        # for ti in self.tape:
+        #     print('%s' % ti)
 
         for tapeitem in self.tape:
-            print('tape_dump: tape_item=%s' % tapeitem)
+            # print('tape_dump: tape_item=%s' % tapeitem)
             if tapeitem['type'] == 'Trade':
                 dumpfile.write('%s, %s, %s, %s, %s\n' %
                                (session_id, tapeitem['pool_id'], tapeitem['time'], tapeitem['price'], str(tapeitem)))

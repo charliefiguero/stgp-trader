@@ -1,12 +1,8 @@
 """ GP_Entity will initialise multiple of these and give them each an improvement function dictated by the tree of the individual."""
 
-import sys
-import random
-from time import sleep
 from typing import List
-import json
 
-from BSE2_msg_classes import Assignment, Order, ExchMsg
+from BSE2_msg_classes import Order
 from BSE2_trader_agents import Trader
 
 class Order_Data():
