@@ -592,12 +592,6 @@ if __name__ == "__main__":
                        traders_spec, order_sched, summary_data_file, tape_data_file,
                        blotter_data_file, False)
 
-    stgp_e.total_gen_profits()
-    stgp_e.write_total_gen_profits()
-    stgp_e.write_gen_records()
-    stgp_e.write_best_exprs()
-    stgp_e.write_hof()
-
 
 
     hof_list = stgp_e.hall_of_fame.items
@@ -605,7 +599,12 @@ if __name__ == "__main__":
     print(item.__dict__)
     string_item = str(item)
 
-    # from deap import gp
+    from deap import gp
+
+    print(type(item))
+    newer = gp.PrimitiveTree(item)
+    print(type(newer))
+    print(newer)
     
     # newer = gp.PrimitiveTree.from_string(string_item, stgp_e.pset)
     # print(newer)

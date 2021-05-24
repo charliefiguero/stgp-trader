@@ -11,9 +11,6 @@ stgp_csvs/improvements/*
 stgp_csvs/gen_records/*
 !stgp_csvs/gen_records/.gitkeep
 
-stgp_csvs/best_exprs/*
-!stgp_csvs/best_exprs/.gitkeep
-
 stgp_csvs/hall_of_fame/*
 !stgp_csvs/hall_of_fame/.gitkeep
 

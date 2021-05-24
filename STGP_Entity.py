@@ -27,27 +27,6 @@ import experiment_setup
 def if_then_else(inputed, output1, output2):
     return output1 if inputed else output2
 
-def draw_expr(expr, name=None):
-    nodes, edges, labels = gp.graph(expr)
-
-    ### Graphviz Section ###
-    g = pgv.AGraph()
-    g.add_nodes_from(nodes)
-    g.add_edges_from(edges)
-    g.layout(prog="dot")
-
-    for i in nodes:
-        n = g.get_node(i)
-        n.attr["label"] = labels[i]
-
-    # saves to tree.pdf
-    now = datetime.now()
-    # print(f"Current time: {now}\n")
-    if not name == None:
-        g.draw(f"trees/tree {name}.pdf")
-    else:
-        g.draw(f"trees/tree {now}.pdf")
-
 
 class STGP_Entity(Entity):
 
@@ -293,16 +272,12 @@ class STGP_Entity(Entity):
         with open('stgp_csvs/gen_records/' + str(now), 'w') as outfile:
             outfile.write(jsonpickle.encode(self.gen_records, indent=4))
 
-    def write_best_exprs(self):
-        now = datetime.now()
-        with open('stgp_csvs/best_exprs/' + str(now), 'w') as outfile:
-            outfile.write(jsonpickle.encode(self.best_exprs, indent=4))
-
     def write_hof(self):
         now = datetime.now()
         with open('stgp_csvs/hall_of_fame/' + str(now), 'w') as outfile:
             for tree in self.hall_of_fame:
-                outfile.write(str(tree))
+                output = gp.PrimitiveTree(tree)
+                outfile.write(jsonpickle.encode(output, indent=4))
 
 
 if __name__ == "__main__":

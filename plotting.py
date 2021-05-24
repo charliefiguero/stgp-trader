@@ -10,7 +10,6 @@ import pygraphviz as pgv
 from deap import gp
 
 
-
 def read_pickle(fname):
     with open(fname, 'r') as file:
         data = file.read()
@@ -131,14 +130,36 @@ def plot_best_exps():
 
     print(exp_df)
 
+def draw_expr(expr, name=None):
+    nodes, edges, labels = gp.graph(expr)
+
+    ### Graphviz Section ###
+    g = pgv.AGraph()
+    g.add_nodes_from(nodes)
+    g.add_edges_from(edges)
+    g.layout(prog="dot")
+
+    for i in nodes:
+        n = g.get_node(i)
+        n.attr["label"] = labels[i]
+
+    # saves to tree.pdf
+    now = datetime.now()
+    # print(f"Current time: {now}\n")
+    if not name == None:
+        g.draw(f"trees/tree {name}.pdf")
+    else:
+        g.draw(f"trees/tree {now}.pdf")
+
 def plot_hof():
-    list_of_files = glob.glob('stgp_csvs/best_exprs/*') # * means all if need specific format then *.csv
+    list_of_files = glob.glob('stgp_csvs/hall_of_fame/*') # * means all if need specific format then *.csv
     latest_file = max(list_of_files, key=os.path.getctime)
     print(f'reading file: ', latest_file, '\n')
 
-    experiment_data = read_pickle(latest_file)
-    thing = experiment_data
-    print(thing)
+    thawed_hof = read_pickle(latest_file)
+
+    draw_expr(thawed_hof)
+
 
 
     # test = experiment_data[0]['py/seq'][0]
