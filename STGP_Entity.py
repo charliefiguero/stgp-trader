@@ -8,9 +8,10 @@ import datetime
 from datetime import datetime
 from typing import NewType
 from time import sleep
-from statistics import mean
+from statistics import mean, stdev
 import jsonpickle
 import pprint
+import json
 
 from deap import gp, creator, base, tools, algorithms
 # import pygraphviz as pgv
@@ -62,6 +63,11 @@ class STGP_Entity(Entity):
 
         # for logging
         self.stats = tools.Statistics(key=lambda ind: ind.fitness.values)
+        self.stats.register("avg", lambda xs : mean([x[0] for x in xs]))
+        self.stats.register("std", lambda xs: stdev([x[0] for x in xs]))
+        self.stats.register("min", min)
+        self.stats.register("max", max)
+        self.gen_records = []
         self.prv_exprs = []
 
         self.traders = {} # traders are passed compiled exprs
@@ -148,18 +154,28 @@ class STGP_Entity(Entity):
 
     def evaluate_population(self, time):
         """ calculate fitnesses for the population """
-        return map(lambda x: self.toolbox.evaluate(x, time), self.exprs)
+        for expr in self.exprs:
+            expr.fitness.values = (self.evaluate_expr(expr, time), )
+
+        # return map(lambda x: self.toolbox.evaluate(x, time), self.exprs)
+        return map(lambda x: x.fitness.values[0], self.exprs)
 
     def evolve_population(self, time):
-        CXPB, MUTPB, NGEN = 0.5, 0.2, 40
+        CXPB, MUTPB= 0.5, 0.2
 
         print(f"Evolving population for {self.lei}, generation: {int(time / self.EVAL_TIME)}")
 
         profits = [tr.get_profit(time) for tr in self.traders.values()]
-        print(f'generational profits: {sum(profits)}')
+        print(f'generational profits: {sum(profits)}\n')
         
         # Evaluate the entire population
         fitnesses = self.evaluate_population(time)
+
+        # statistics
+        record = self.stats.compile(self.exprs)
+        self.gen_records.append(record)
+        print(record)
+
         # Select the next generation individuals
         offspring = self.toolbox.select(self.exprs, len(self.exprs))
         # Clone the selected individuals
@@ -179,8 +195,6 @@ class STGP_Entity(Entity):
                 # draw_expr(child1, "child1 post")
                 # draw_expr(child2, "child2 post")
                 
-        print()
-
         for mutant in offspring:
             if random.random() < MUTPB:
                 # print(f"about to mutate: {mutant} \n")
@@ -236,7 +250,6 @@ class STGP_Entity(Entity):
 
     def total_gen_profits(self):
         num_gen = len(list(self.traders.values())[0].generational_profits) + 1
-        num_traders = len(self.traders)
 
         all_profits = []
         for i in range(num_gen-1):
@@ -251,15 +264,10 @@ class STGP_Entity(Entity):
 
         all_profits.append(final_gen_profits)
 
-        print("all profits...")
-        print(all_profits)
-        print()
+        print(f"all profits...\n{all_profits}\n")
 
-        print("output...")
         output = [(count, sum(x)) for count, x in enumerate(all_profits)]
-        print(output)
-        print()
-
+        print(f"output...\n{output}\n")
         return output
 
     def write_total_gen_profits(self):
@@ -277,6 +285,15 @@ class STGP_Entity(Entity):
         now = datetime.now() 
         with open('stgp_csvs/improvements/' + str(now), 'w') as outfile:
             outfile.write(jsonpickle.encode(data, indent=4))
+
+    def write_gen_records(self):
+        now = datetime.now()
+        p = jsonpickle.Pickler()
+        with open('stgp_csvs/gen_records/' + str(now), 'w') as outfile:
+            for record in self.gen_records:
+                p_record = p.encode(record)
+                outfile.write(p_record)
+                # outfile.write(json.dumps(record)+'\n')
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ from BSE2_msg_classes import Assignment, Order, ExchMsg
 from BSE2_trader_agents import Trader
 
 class Order_Data():
-
+    """ used for logging """
     def __init__(self, customer_price, trans_price, posted_improve, actual_improve, exchange_msg):
         self.customer_price = customer_price
         self.trans_price = trans_price
@@ -44,7 +44,7 @@ class STGP_Trader(Trader):
         # profit tracking
         self.last_evolution = 0.0
         self.current_gen = 0
-        self.profit_since_evolution = 0
+        self.profit_since_evolution = 0.0
         self.generational_profits = []
 
         # Exponential Moving Average

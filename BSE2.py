@@ -539,8 +539,8 @@ if __name__ == "__main__":
     # 'timemode': 'periodic'}
 
     # buyers_spec = [('ZIP', 100)]
-    buyers_spec = [('GVWY', 1)]
-    sellers_spec = [('GVWY', 51)]
+    buyers_spec = experiment_setup.BUYERS_SPEC
+    sellers_spec = experiment_setup.SELLERS_SPEC
     traders_spec = {'sellers': sellers_spec, 'buyers': buyers_spec}
 
     total_traders = 0
@@ -593,5 +593,8 @@ if __name__ == "__main__":
     # stgp_e.print_t_gen_profits()
     stgp_e.total_gen_profits()
     stgp_e.write_total_gen_profits()
+    print('get records...')
+    print(stgp_e.gen_records)
+    stgp_e.write_gen_records()
 
     print('\n Experiment Finished')

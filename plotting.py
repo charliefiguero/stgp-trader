@@ -41,21 +41,48 @@ def plot_gen_profits(gen_profits, title = None):
     output.get_figure().savefig(f'networth_plots/{title}.png')
     # plt.show()
 
+def plot_mean_profits(traders, title = None):
+    # get data
+    mean_profits = []
+
+    # plot
+    fig, ax = plt.subplots()
+    ax.set_title('Mean Profits for STGP_Entity')
+    ax.set_xlabel('Generation')
+    ax.set_ylabel('Mean Profit')
+    sns.set_theme()
+    output = sns.lineplot(data=gen_profits, x=gen_profits.index, y=gen_profits, ax=ax)
+
+    if title == None:
+        title = datetime.now()
+    output.get_figure().savefig(f'networth_plots/{title}.png')
+    # plt.show()
+
+
 if __name__ == "__main__":
-    list_of_files = glob.glob('stgp_csvs/improvements/*') # * means all if need specific format then *.csv
-    latest_file = max(list_of_files, key=os.path.getctime)
-    print(f'reading file: ', latest_file, '\n')
+    read_pickle
+
+
+
+
+    # list_of_files = glob.glob('stgp_csvs/improvements/*') # * means all if need specific format then *.csv
+    # latest_file = max(list_of_files, key=os.path.getctime)
+    # print(f'reading file: ', latest_file, '\n')
     
-    experiment_data = read_pickle(latest_file)
-    exp_df = pd.DataFrame.from_dict(experiment_data)
+    # experiment_data = read_pickle(latest_file)
+    # exp_df = pd.DataFrame.from_dict(experiment_data)
 
 
-    # calculate data
-    gen_profits = gen_profits(exp_df['traders_data'])
+    # # calculate data
+    # gen_profits = gen_profits(exp_df['traders_data'])
 
-    # plotting
-    print(gen_profits)
-    plot_gen_profits(gen_profits)
+    # # plotting
+    # print(gen_profits)
+    # plot_gen_profits(gen_profits)
+
+
+
+
 
     # print(traders_gen_profits(exp_df['traders_data'][0]))
     # print(gen_profits(exp_df['traders_data']))

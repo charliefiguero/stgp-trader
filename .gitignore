@@ -8,6 +8,9 @@ output.txt
 stgp_csvs/improvements/*
 !stgp_csvs/improvements/.gitkeep
 
+stgp_csvs/gen_records/*
+!stgp_csvs/gen_records/.gitkeep
+
 networth_plots/*
 !networth_plots/.gitkeep
 
