@@ -4,6 +4,7 @@ from datetime import datetime
 from statistics import mean, stdev
 import jsonpickle
 from operator import attrgetter
+import pickle
 
 from deap import gp, creator, base, tools, algorithms
 
@@ -250,10 +251,12 @@ class STGP_Entity(Entity):
 
     def write_hof(self):
         now = datetime.now()
-        with open('stgp_csvs/hall_of_fame/' + str(now), 'w') as outfile:
+        with open('stgp_csvs/hall_of_fame/' + str(now), 'wb') as outfile:
             for tree in self.hall_of_fame:
                 output = gp.PrimitiveTree(tree)
-                outfile.write(jsonpickle.encode(output, indent=4))
+                pickle.dump(output, outfile)
+                # output = gp.PrimitiveTree(tree)
+                # outfile.write(jsonpickle.encode(output, indent=4))
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import pygraphviz as pgv
 from deap import gp
+import pickle
 
 
 def read_pickle(fname):
@@ -137,14 +138,16 @@ def plot_hof():
         raise AssertionError('No records present. Try rerunning the experient.')
 
     latest_file = max(list_of_files, key=os.path.getctime)
-    print(f'reading file: ', latest_file, '\n')
-    thawed_hof = read_pickle(latest_file)
-    draw_expr(thawed_hof)
+
+    with open(latest_file, 'rb') as infile:
+        thawed_hof = pickle.load(infile)
+        print(thawed_hof)
+        draw_expr(thawed_hof)
 
 
 if __name__ == "__main__":
-    plot_stats()
-    # plot_hof()
+    # plot_stats()
+    plot_hof()
 
 
 
