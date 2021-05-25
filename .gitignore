@@ -20,6 +20,12 @@ networth_plots/*
 trees/*
 !trees/.gitkeep
 
+stats_plots/avg/*
+stats_plots/std/*
+stats_plots/max/*
+stats_plots/min/*
+!stats_plots/*/.gitkeep
+
 test.py
 slurm*
 stgp_diss.out

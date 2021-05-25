@@ -80,22 +80,35 @@ def plot_stats():
     ax.set_ylabel('Average Trader Profit')
     sns.set_theme()
     output = sns.lineplot(x=exp_df['gen_num'], y=exp_df['avg'], ax=ax)
-    output.get_figure().savefig(f'networth_plots/{datetime.now()}.png')
+    output.get_figure().savefig(f'stats_plots/avg/{datetime.now()}.png')
 
+    # std
+    fig, ax = plt.subplots()
+    ax.set_title('Std Profit for STGP_Traders')
+    ax.set_xlabel('Generation')
+    ax.set_ylabel('Std Trader Profit')
+    sns.set_theme()
+    output = sns.lineplot(x=exp_df['gen_num'], y=exp_df['std'], ax=ax)
+    output.get_figure().savefig(f'stats_plots/std/{datetime.now()}.png')
 
+    # max
+    fig, ax = plt.subplots()
+    ax.set_title('Max Trader Profit for STGP')
+    ax.set_xlabel('Generation')
+    ax.set_ylabel('Max Trader Profit')
+    sns.set_theme()
+    output = sns.lineplot(x=exp_df['gen_num'], y=exp_df['max'], ax=ax)
+    output.get_figure().savefig(f'stats_plots/max/{datetime.now()}.png')
 
-
-    # exp_df.plot(x='gen_num', y='avg', kind='line')
-    # plt.show()
-
-    # exp_df.plot(x='gen_num', y='std', kind='line')
-    # plt.show()
-
-    # exp_df.plot(x='gen_num', y='max', kind='line')
-    # plt.show()
-
-    # exp_df.plot(x='gen_num', y='min', kind='line')
-    # plt.show()
+    # min
+    fig, ax = plt.subplots()
+    ax.set_title('Min Trader Profit for STGP')
+    ax.set_xlabel('Generation')
+    ax.set_ylabel('Min Trader Profit')
+    sns.set_theme()
+    output = sns.lineplot(x=exp_df['gen_num'], y=exp_df['avg'], ax=ax)
+    output.get_figure().savefig(f'stats_plots/min/{datetime.now()}.png')
+    
 
 def draw_expr(expr, name=None):
     nodes, edges, labels = gp.graph(expr)
