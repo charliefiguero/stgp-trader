@@ -32,6 +32,9 @@ def gen_profits(all_traders):
 
 def plot_gen_profits(gen_profits, title = None):
     list_of_files = glob.glob('stgp_csvs/improvements/*') # * means all if need specific format then *.csv
+    if not list_of_files:
+        raise AssertionError('No records present. Try rerunning the experient.')
+
     latest_file = max(list_of_files, key=os.path.getctime)
     print(f'reading file: ', latest_file, '\n')
     
@@ -54,25 +57,11 @@ def plot_gen_profits(gen_profits, title = None):
     output.get_figure().savefig(f'networth_plots/{title}.png')
     # plt.show()
 
-def plot_mean_profits(traders, title = None):
-    # get data
-    mean_profits = []
-
-    # plot
-    fig, ax = plt.subplots()
-    ax.set_title('Mean Profits for STGP_Entity')
-    ax.set_xlabel('Generation')
-    ax.set_ylabel('Mean Profit')
-    sns.set_theme()
-    output = sns.lineplot(data=gen_profits, x=gen_profits.index, y=gen_profits, ax=ax)
-
-    if title == None:
-        title = datetime.now()
-    output.get_figure().savefig(f'networth_plots/{title}.png')
-    # plt.show()
-
 def plot_stats():
     list_of_files = glob.glob('stgp_csvs/gen_records/*') # * means all if need specific format then *.csv
+    if not list_of_files:
+        raise AssertionError('No gen_records present. Try rerunning the experient.')
+
     latest_file = max(list_of_files, key=os.path.getctime)
     print(f'reading file: ', latest_file, '\n')
 
@@ -81,20 +70,32 @@ def plot_stats():
     exp_df.insert(0, 'gen_num', exp_df.index.tolist())
     exp_df['max'] = list(map(lambda x : x[0], exp_df['max']))
     exp_df['min'] = list(map(lambda x : x[0], exp_df['min']))
+    
+    # PLOTTING
 
-    print(exp_df)
+    # avg
+    fig, ax = plt.subplots()
+    ax.set_title('Average Profit for STGP_Traders')
+    ax.set_xlabel('Generation')
+    ax.set_ylabel('Average Trader Profit')
+    sns.set_theme()
+    output = sns.lineplot(x=exp_df['gen_num'], y=exp_df['avg'], ax=ax)
+    output.get_figure().savefig(f'networth_plots/{datetime.now()}.png')
 
-    exp_df.plot(x='gen_num', y='avg', kind='line')
-    plt.show()
 
-    exp_df.plot(x='gen_num', y='std', kind='line')
-    plt.show()
 
-    exp_df.plot(x='gen_num', y='max', kind='line')
-    plt.show()
 
-    exp_df.plot(x='gen_num', y='min', kind='line')
-    plt.show()
+    # exp_df.plot(x='gen_num', y='avg', kind='line')
+    # plt.show()
+
+    # exp_df.plot(x='gen_num', y='std', kind='line')
+    # plt.show()
+
+    # exp_df.plot(x='gen_num', y='max', kind='line')
+    # plt.show()
+
+    # exp_df.plot(x='gen_num', y='min', kind='line')
+    # plt.show()
 
 def draw_expr(expr, name=None):
     nodes, edges, labels = gp.graph(expr)
@@ -119,17 +120,18 @@ def draw_expr(expr, name=None):
 
 def plot_hof():
     list_of_files = glob.glob('stgp_csvs/hall_of_fame/*') # * means all if need specific format then *.csv
+    if not list_of_files:
+        raise AssertionError('No records present. Try rerunning the experient.')
+
     latest_file = max(list_of_files, key=os.path.getctime)
     print(f'reading file: ', latest_file, '\n')
-
     thawed_hof = read_pickle(latest_file)
-
     draw_expr(thawed_hof)
 
 
 if __name__ == "__main__":
-    # plot_stats()
-    plot_hof()
+    plot_stats()
+    # plot_hof()
 
 
 
