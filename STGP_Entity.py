@@ -5,6 +5,9 @@ from statistics import mean, stdev
 import jsonpickle
 from operator import attrgetter
 import pickle
+import json
+from copy import deepcopy
+import math
 
 from deap import gp, creator, base, tools, algorithms
 
@@ -50,13 +53,14 @@ class STGP_Entity(Entity):
 
     def create_deap_toolbox_and_pset(self):
         # initialise pset
-        pset = gp.PrimitiveSetTyped("main", [float, float, float, float, float], float)
+        pset = gp.PrimitiveSetTyped("main", [float, float, float, float, float, float], float)
         # inputs to the tree
         pset.renameArguments(ARG0="ema_ind")
-        pset.renameArguments(ARG1="best_ask")
-        pset.renameArguments(ARG2="best_bid")
+        pset.renameArguments(ARG1="best_same") # same orderbook side
+        pset.renameArguments(ARG2="best_opp") # opposite orderbook side
         pset.renameArguments(ARG3="time")
         pset.renameArguments(ARG4="countdown")
+        pset.renameArguments(ARG5="cust_price")
         # float operations
         pset.addPrimitive(operator.add, [float, float], float)
         pset.addPrimitive(operator.sub, [float, float], float)
@@ -84,7 +88,7 @@ class STGP_Entity(Entity):
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
         # evolution tools
         toolbox.register("evaluate", self.evaluate_expr)
-        toolbox.register("select", tools.selTournament, tournsize=3)
+        toolbox.register("select", tools.selTournament, tournsize=experiment_setup.TOURNSIZE)
         toolbox.register("mate", gp.cxOnePoint)
         toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
         toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
@@ -96,9 +100,18 @@ class STGP_Entity(Entity):
         return pset, toolbox
 
     def init_traders(self, n: int, balance: int, time: float):
-        self.exprs = self.toolbox.population(n)
 
-        self.prv_exprs.append(self.exprs.copy())
+        with open('trader_conversions.json', 'r') as infile:
+            traders = json.load(infile)
+            shvr = traders['SHVR']
+
+        # read 
+        loaded_inds = [creator.Individual(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(n)]
+
+        # self.exprs = self.toolbox.population(n)
+        self.exprs = loaded_inds
+
+        self.prv_exprs.append(deepcopy(self.exprs))
 
         for count, expr in enumerate(self.exprs):
             # traders never get the same id
@@ -129,6 +142,12 @@ class STGP_Entity(Entity):
         return map(lambda x: x.fitness.values[0], self.exprs)
 
     def evolve_population(self, time):
+        if not experiment_setup.evolving:
+            print(f'generation: {int(time / self.EVAL_TIME)}')
+            for trader in self.traders.values():
+                trader.reset_gen_profits()
+            return
+
         print(f"Evolving population for {self.lei}, generation: {int(time / self.EVAL_TIME)}")
 
         profits = [tr.get_profit(time) for tr in self.traders.values()]
@@ -241,12 +260,12 @@ class STGP_Entity(Entity):
         data["traders_data"] = traders_data
 
         now = datetime.now() 
-        with open('stgp_csvs/improvements/' + str(now), 'w') as outfile:
+        with open('stgp_csvs/improvements/' + str(now) + '.json', 'w') as outfile:
             outfile.write(jsonpickle.encode(data, indent=4))
 
     def write_gen_records(self):
         now = datetime.now()
-        with open('stgp_csvs/gen_records/' + str(now), 'w') as outfile:
+        with open('stgp_csvs/gen_records/' + str(now) + '.json', 'w') as outfile:
             outfile.write(jsonpickle.encode(self.gen_records, indent=4))
 
     def write_hof(self):
@@ -255,15 +274,24 @@ class STGP_Entity(Entity):
             for tree in self.hall_of_fame:
                 output = gp.PrimitiveTree(tree)
                 pickle.dump(output, outfile)
-                # output = gp.PrimitiveTree(tree)
-                # outfile.write(jsonpickle.encode(output, indent=4))
 
 
 if __name__ == "__main__":
     
     e = STGP_Entity("STGP0", 100, 'BUY', 1000)
-    e.init_traders(10, 100, 0.0)
 
-    list(e.traders.values())[0].get_gen_profits()
-    print('hello')
+    with open('trader_conversions.json', 'r') as infile:
+        traders = json.load(infile)
+        shvr = traders['SHVR']
+        test = gp.PrimitiveTree.from_string(shvr, e.pset)
+        ind = creator.Individual(test)
+
+        print(ind)
+        # test = gp.PrimitiveTree.from_string
+
+
+    # e.init_traders(10, 100, 0.0)
+
+    # list(e.traders.values())[0].get_gen_profits()
+    # print('hello')
 

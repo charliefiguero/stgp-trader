@@ -89,8 +89,14 @@ class STGP_Trader(Trader):
             
             # calculate improvement on customer order via STGP function
             if self.ema != None and lob['bids']['bestp'] != None and lob['asks']['bestp'] != None:
-                improvement = self.trading_func(self.ema, lob['bids']['bestp'], lob['asks']['bestp'], time, countdown)
-            # resets negative improvements
+                if self.job == 'Ask':
+                    improvement = self.trading_func(self.ema, lob['asks']['bestp'], lob['bids']['bestp'], time, countdown, self.limit)
+                elif self.job == 'Bid':
+                    improvement = self.trading_func(self.ema, lob['bids']['bestp'], lob['asks']['bestp'], time, countdown, self.limit)
+                else: 
+                    raise ValueError('Unknow job in stgp_trader : getorder.')
+
+            # reset negative improvements
             if improvement < 0:
                 improvement = 0
             if verbose:

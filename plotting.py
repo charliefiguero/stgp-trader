@@ -71,6 +71,8 @@ def plot_stats():
     exp_df.insert(0, 'gen_num', exp_df.index.tolist())
     exp_df['max'] = list(map(lambda x : x[0], exp_df['max']))
     exp_df['min'] = list(map(lambda x : x[0], exp_df['min']))
+
+    print(exp_df)
     
     # PLOTTING
 
@@ -85,9 +87,9 @@ def plot_stats():
 
     # std
     fig, ax = plt.subplots()
-    ax.set_title('Std Profit for STGP_Traders')
+    ax.set_title('Standard Deviation of Profit for STGP_Traders')
     ax.set_xlabel('Generation')
-    ax.set_ylabel('Std Trader Profit')
+    ax.set_ylabel('Standard Deviation')
     sns.set_theme()
     output = sns.lineplot(x=exp_df['gen_num'], y=exp_df['std'], ax=ax)
     output.get_figure().savefig(f'stats_plots/std/{datetime.now()}.png')
@@ -146,7 +148,7 @@ def plot_hof():
 
 
 if __name__ == "__main__":
-    # plot_stats()
+    plot_stats()
     plot_hof()
 
 
