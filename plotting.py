@@ -1,14 +1,17 @@
 import os
 import glob
+import csv
+from datetime import datetime
+import pickle
+
 
 import jsonpickle
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from datetime import datetime
 import pygraphviz as pgv
 from deap import gp
-import pickle
+
 
 
 def read_pickle(fname):
@@ -64,6 +67,7 @@ def plot_stats():
         raise AssertionError('No gen_records present. Try rerunning the experient.')
 
     latest_file = max(list_of_files, key=os.path.getctime)
+
     print(f'reading file: ', latest_file, '\n')
 
     experiment_data = read_pickle(latest_file)
@@ -146,10 +150,24 @@ def plot_hof():
         print(thawed_hof)
         draw_expr(thawed_hof)
 
+def plot_tran_price():
+    with open('Test00tapes.csv', 'r') as infile:
+        reader = csv.reader(infile)
+        timeprice = [(row[2], row[3]) for row in reader]
+        times = [item[0] for item in timeprice]
+        prices = [item[1] for item in timeprice]
+
+    print(len(times))
+    print(len(prices))
+    output = sns.lineplot(x=times, y=prices)
+    output.get_figure().savefig(f'timeprices{datetime.now()}.png')
+    # plt.show()
+
 
 if __name__ == "__main__":
     plot_stats()
-    plot_hof()
+    # plot_tran_price()
+    # plot_hof()
 
 
 
