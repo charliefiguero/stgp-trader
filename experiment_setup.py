@@ -1,5 +1,5 @@
 # general
-END_TIME = 100000.0
+END_TIME = 100.0
 # must be atleast 1 - needs refactoring
 BUYERS_SPEC = [('GVWY', 1)] 
 SELLERS_SPEC = [('GVWY', 101)]
