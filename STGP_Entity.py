@@ -43,6 +43,10 @@ class STGP_Entity(Entity):
         self.hall_of_fame = tools.HallOfFame(1)
         self.prv_exprs = []
 
+        self.best_ind_fname = str(datetime.now())
+        with open('stgp_csvs/generational_best/' + self.best_ind_fname, 'w') as outfile:
+            outfile.write('')
+
         self.traders = {} # traders are passed compiled exprs
         self.traders_count = 0
 
@@ -93,7 +97,7 @@ class STGP_Entity(Entity):
         toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
         toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
         # bloat control
-        # max height == 17 (as specificed by Koza, 1989)
+        # 
         toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
         toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
 
@@ -105,7 +109,7 @@ class STGP_Entity(Entity):
             traders = json.load(infile)
             shvr = traders['SHVR']
 
-        # read 
+        # load in prebuilt traders 
         loaded_inds = [creator.Individual(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(n)]
 
         # self.exprs = self.toolbox.population(n)
@@ -144,6 +148,13 @@ class STGP_Entity(Entity):
     def evolve_population(self, time):
         if not experiment_setup.evolving:
             print(f'generation: {int(time / self.EVAL_TIME)}')
+            profits = [tr.get_profit(time) for tr in self.traders.values()]
+            print(f'generational profits: {sum(profits)}')
+
+            offspring = deepcopy(self.exprs)
+            self.exprs[:] = offspring
+            self.update_trader_expr(time)
+
             for trader in self.traders.values():
                 trader.reset_gen_profits()
             return
@@ -151,15 +162,18 @@ class STGP_Entity(Entity):
         print(f"Evolving population for {self.lei}, generation: {int(time / self.EVAL_TIME)}")
 
         profits = [tr.get_profit(time) for tr in self.traders.values()]
-        print(f'generational profits: {sum(profits)}\n')
+        print(f'generational profits: {sum(profits)}')
         
         # Evaluate the entire population
         fitnesses = self.evaluate_population(time)
         
         # update the hall of fame
         self.hall_of_fame.update(self.exprs)
+
         best_ind = sorted(self.exprs, key=attrgetter('fitness.values'), reverse=True)[0]
-        print('best_ind from stgp enittiy', best_ind, 'type:', type(best_ind))
+        with open('stgp_csvs/generational_best/' + self.best_ind_fname, 'a') as outfile:
+            outfile.write(str(best_ind)+'\n')
+        print('best_ind from generation:', best_ind)
 
         # statistics
         record = self.stats.compile(self.exprs)
@@ -170,6 +184,11 @@ class STGP_Entity(Entity):
         offspring = self.toolbox.select(self.exprs, len(self.exprs))
         # Clone the selected individuals
         offspring = list(map(self.toolbox.clone, offspring))
+        
+        # print('old')
+        # print(list(map(lambda x : x.fitness.values, self.exprs)))
+        # print('new')
+        # print(list(map(lambda x : x.fitness.values, offspring)))
 
         # Apply crossover and mutation on the offspring
         # [::2] means nothing for first and second argument and jump by 2.

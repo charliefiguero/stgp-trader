@@ -14,6 +14,9 @@ stgp_csvs/gen_records/*
 stgp_csvs/hall_of_fame/*
 !stgp_csvs/hall_of_fame/.gitkeep
 
+stgp_csvs/generational_best/*
+!stgp_csvs/generational_best/.gitkeep
+
 networth_plots/*
 !networth_plots/.gitkeep
 
