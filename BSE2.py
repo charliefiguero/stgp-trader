@@ -46,8 +46,7 @@
 import sys
 import random
 from typing import List
-from time import sleep
-import time
+from time import perf_counter
 
 # from BSE2_msg_classes import Assignment, Order, ExchMsg
 from BSE2_exchange import Exchange
@@ -175,7 +174,7 @@ def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specific
 def market_session(session_id, starttime, endtime, entities, stgp_entities, trader_spec, order_schedule, summaryfile, tapedumpfile,
                    blotterdumpfile, verbose):
 
-    start = time.perf_counter()
+    start = perf_counter()
 
     def blotterdump(all_traders, blotdumpfile):
         # traders dump their blotters
@@ -501,7 +500,7 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
     for e in range(n_exchanges):
         trade_stats(session_id, traders, summaryfile, time, exchanges[e].publish_lob(time, None, lob_verbose))
 
-    end = time.perf_counter()
+    end = perf_counter()
     print(f"Market session took {end-start} seconds.")
 
 
