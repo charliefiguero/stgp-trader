@@ -1,8 +1,8 @@
 # general
-END_TIME = 1000.0
+END_TIME = 100000.0
 # must be atleast 1 - needs refactoring
-BUYERS_SPEC = [('ZIP', 50)] 
-SELLERS_SPEC = [('ZIP', 100)]
+BUYERS_SPEC = [('ZIP', 100),('ZIC', 100),('GVWY', 100),('SHVR', 50)] 
+SELLERS_SPEC = [('ZIP', 100),('ZIC', 100),('GVWY', 100),('SHVR', 150)]
 
 # STGP variables
 NUM_TRADERS_PER_ENTITY = 50
