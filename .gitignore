@@ -23,6 +23,9 @@ networth_plots/*
 trees/*
 !trees/.gitkeep
 
+second_run/*
+initial_zic_run/*
+
 stats_plots/avg/*
 stats_plots/std/*
 stats_plots/max/*

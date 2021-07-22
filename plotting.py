@@ -13,7 +13,6 @@ import pygraphviz as pgv
 from deap import gp
 
 
-
 def read_pickle(fname):
     with open(fname, 'r') as file:
         data = file.read()
@@ -147,6 +146,7 @@ def plot_hof():
 
     with open(latest_file, 'rb') as infile:
         thawed_hof = pickle.load(infile)
+        print(type(thawed_hof))
         print(thawed_hof)
         draw_expr(thawed_hof)
 
@@ -165,9 +165,9 @@ def plot_tran_price():
 
 
 if __name__ == "__main__":
-    plot_stats()
+    # plot_stats()
     # plot_tran_price()
-    # plot_hof()
+    plot_hof()
 
 
 
