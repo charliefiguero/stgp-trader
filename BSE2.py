@@ -101,7 +101,7 @@ def trade_stats(expid, traders, dumpfile, time, lob):
 # create a bunch of traders from traders_specification, links them to the relevant entities
 # returns tuple (n_buyers, n_sellers)
 # optionally shuffles the pack of buyers and the pack of sellers
-def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specification, traders, shuffle, verbose):
+def populate_market(entities, stgp_entities, traders_specification, traders, shuffle, verbose):
 # def populate_market(entities, stgp_entities, traders_specification, traders, shuffle, verbose): # removed for bc4
 
     def shuffle_traders(ttype_char, n, shuff_traders):
@@ -124,22 +124,6 @@ def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specific
             traders[tname] = trader_create('NoLEI', ttype, tname)
             n_buyers = n_buyers + 1
 
-    if n_buyers < 1:
-        sys.exit('FATAL: no buyers specified\n')
-
-    ### Initialise STGP traders ###
-
-    num_traders_entity = experiment_setup.NUM_TRADERS_PER_ENTITY
-    trader_starting_balance = experiment_setup.STGP_TRADER_STARTING_BALANCE
-    start_time = 0
-
-    for stgpe in stgp_entities:
-        stgpe.init_traders(num_traders_entity, trader_starting_balance, start_time)
-        n_buyers += num_traders_entity
-        traders.update(stgpe.traders)
-
-    ###############################
-
     # if shuffle:
     #     shuffle_traders('B', n_buyers, traders)
 
@@ -151,11 +135,32 @@ def populate_market(entities, stgp_entities: List[STGP_Entity], traders_specific
             traders[tname] = trader_create('NoLEI', ttype, tname)
             n_sellers = n_sellers + 1
 
-    if n_sellers < 1:
-        sys.exit('FATAL: no sellers specified\n')
 
     # if shuffle:
     #     shuffle_traders('S', n_sellers, traders)
+
+    ### Initialise STGP traders ###
+
+    num_traders_entity = experiment_setup.NUM_TRADERS_PER_ENTITY
+    trader_starting_balance = experiment_setup.STGP_TRADER_STARTING_BALANCE
+    start_time = 0
+
+    for stgpe in stgp_entities['BUY']:
+        stgpe.init_traders(num_traders_entity, trader_starting_balance, start_time)
+        n_buyers += num_traders_entity
+        traders.update(stgpe.traders)
+    for stgpe in stgp_entities['SELL']:
+        stgpe.init_traders(num_traders_entity, trader_starting_balance, start_time)
+        n_sellers += num_traders_entity
+        traders.update(stgpe.traders)
+
+
+    if n_buyers < 1:
+        sys.exit('FATAL: no buyers specified\n')
+    if n_sellers < 1:
+        sys.exit('FATAL: no sellers specified\n')
+
+    
 
     if verbose:
         print('>populate_market()')
@@ -187,7 +192,9 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
             # build csv string for all events in blotter
             csv = ''
             for b in blot:
-                csv = csv + '\"%s\", %s, ' % (str(b[0]), b[1])
+                # csv = csv + '\"%s\", %s, ' % (str(b[0]), b[1])
+                # 
+                csv = csv + f"{str(b[0])}|" 
             blotdumpfile.write(
                 '%s, %s, %s, %s, %s, %s\n' % (session_id, trader_id, ttype, balance, blot_len, csv))
 
@@ -333,7 +340,9 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
             print('\n\n%s; t=%08.2f (percent remaining: %4.1f/100) ' % (session_id, time, time_left * 100))
 
         # notify entities of time passing
-        for e in stgp_entities: 
+        for e in stgp_entities['BUY']: 
+            e.entity_update(time)
+        for e in stgp_entities['SELL']: 
             e.entity_update(time)
 
         # get any new assignments (customer orders) for traders to execute
@@ -504,6 +513,7 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
     print(f"Market session took {end-start} seconds.")
 
 
+
 #############################
 
 # # Below here is where we set up and run a series of experiments
@@ -527,8 +537,8 @@ if __name__ == "__main__":
 
     # range1 = (105, 105, [bronco_schedule_offsetfn, [] ] )
     # range1 = (50, 150)
-    range1 = (150, 150)
-    demand_schedule = [{'from': start_time, 'to': end_time, 'ranges': [range1], 'stepmode': 'fixed'}]
+    range2 = (150, 150)
+    demand_schedule = [{'from': start_time, 'to': end_time, 'ranges': [range2], 'stepmode': 'fixed'}]
 
     order_sched = {'sup': supply_schedule, 'dem': demand_schedule,
                    'interval': 20,
@@ -561,8 +571,14 @@ if __name__ == "__main__":
     ############ Add STGP entities ############
 
 
-    stgp_e = STGP_Entity(id="STGP_ENTITY", init_balance=10000, job="BUY", duration=duration)
-    stgp_entities = [stgp_e]
+    stgp_there = experiment_setup.STGP_THERE
+    stgp_entities = {'BUY': [], 'SELL': []}
+
+    if stgp_there:
+        for i in range(experiment_setup.STGP_E_BUY):
+            stgp_entities['BUY'].append(STGP_Entity(id="B_STGP_ENTITY_"+str(i), init_balance=10000, job="BUY", duration=duration))
+        for i in range(experiment_setup.STGP_E_SELL):
+            stgp_entities['SELL'].append(STGP_Entity(id="S_STGP_ENTITY_"+str(i), init_balance=10000, job="BUY", duration=duration))
 
 
     #########################################
@@ -589,10 +605,11 @@ if __name__ == "__main__":
 
 
     # write stgp stats
-    stgp_e.total_gen_profits()
-    stgp_e.write_total_gen_profits()
-    stgp_e.write_gen_records()
-    stgp_e.write_hof()
+    # if stgp_there:
+    #     stgp_e.total_gen_profits()
+    #     stgp_e.write_total_gen_profits()
+    #     stgp_e.write_gen_records()
+    #     stgp_e.write_hof()
 
     
     print('\nExperiment Finished')

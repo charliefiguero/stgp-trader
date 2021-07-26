@@ -264,6 +264,7 @@ def customer_orders(time, traders, trader_stats, os, pending, base_oid, verbose)
                 new_pending.append(order)
                 i += 1
 
+
         # for t in range(n_sellers):
         #     issuetime = time + issuetimes[t]
         #     tname = 'S%02d' % t

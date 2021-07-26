@@ -39,9 +39,10 @@ class STGP_Entity(Entity):
         self.stats.register("std", lambda xs: stdev([x[0] for x in xs]))
         self.stats.register("min", min)
         self.stats.register("max", max)
+        self.stats.register
         self.gen_records = []
         self.hall_of_fame = tools.HallOfFame(1)
-        self.prv_exprs = []
+        # self.prv_exprs = []
 
         self.best_ind_fname = str(datetime.now())
         with open('stgp_csvs/generational_best/' + self.best_ind_fname, 'w') as outfile:
@@ -76,8 +77,10 @@ class STGP_Entity(Entity):
         # boolean terminals
         pset.addTerminal(True, bool)
         pset.addTerminal(False, bool)
+
         # ephemeral terminals
-        pset.addEphemeralConstant("qwer", lambda: random.randint(-10, 10), float)
+        # "Ephemerals with different functions should be named differently, even between psets."
+        pset.addEphemeralConstant(ephemeral_name, lambda: random.randint(-10, 10), float)
 
         # create fitness class
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -115,7 +118,7 @@ class STGP_Entity(Entity):
         # self.exprs = self.toolbox.population(n)
         self.exprs = loaded_inds
 
-        self.prv_exprs.append(deepcopy(self.exprs))
+        # self.prv_exprs.append(deepcopy(self.exprs))
 
         for count, expr in enumerate(self.exprs):
             # traders never get the same id
@@ -225,7 +228,7 @@ class STGP_Entity(Entity):
             trader.reset_gen_profits()
 
         # log new exprs
-        self.prv_exprs.append(self.exprs.copy())
+        # self.prv_exprs.append(self.exprs.copy())
 
         print('finished evolving\n')
         return self.exprs
