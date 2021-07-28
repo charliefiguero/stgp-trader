@@ -1,9 +1,11 @@
 """ GP_Entity will initialise multiple of these and give them each an improvement function dictated by the tree of the individual."""
 
 from typing import List
+import random
 
 from BSE2_msg_classes import Order
 from BSE2_trader_agents import Trader
+import BSE2_sys_consts
 
 class Order_Data():
     """ used for logging """
@@ -48,6 +50,9 @@ class STGP_Trader(Trader):
         self.nLastTrades = 5
         self.ema_param = 2 / float(self.nLastTrades + 1)
 
+        # transaction price tracking
+        self.last_t_price = None
+
         # Stat tracking
         self.all_gens_data = []
         self.current_gen_data = Generation_Data(tid, self.current_gen)
@@ -86,19 +91,84 @@ class STGP_Trader(Trader):
             self.job = self.orders[0].atype
 
             improvement = 0
+
+            # ######## INPUT CLEANING ###########
+            # n.b. take care when writing trader_conversions
+
+            # last transaction price
+            ltp = None
+            if self.last_t_price == None:
+                if self.job == 'Bid':
+                    ltp = BSE2_sys_consts.bse_sys_minprice
+                elif self.job == 'Ask':
+                    ltp = BSE2_sys_consts.bse_sys_maxprice
+                else:
+                    raise ValueError('Invalid job type')
+            else:
+                ltp = self.last_t_price
+
+
+            # best bid and ask prices on orderbook
+            best_p_same = None
+            best_p_opp = None
+            if self.job == 'Bid':
+                # same side
+                if lob['bids']['bestp'] == None:
+                    best_p_same = BSE2_sys_consts.bse_sys_minprice
+                else:
+                    best_p_same = lob['bids']['bestp']
+                
+                # opposite side
+                if lob['asks']['bestp'] == None:
+                    best_p_opp = BSE2_sys_consts.bse_sys_maxprice
+                else:
+                    best_p_opp = lob['asks']['bestp']
+
+            elif self.job == 'Ask':
+                # same side
+                if lob['asks']['bestp'] == None:
+                    best_p_same = BSE2_sys_consts.bse_sys_maxprice
+                else:
+                    best_p_same = lob['asks']['bestp']
+                
+                # opposite side
+                if lob['bids']['bestp'] == None:
+                    best_p_opp = BSE2_sys_consts.bse_sys_minprice
+                else:
+                    best_p_opp = lob['bids']['bestp']
+
+            else:
+                raise ValueError('Invalid job type')
+
+
+            # best possible price and worst possible price
+            best_possible = None
+            worst_possible = None
+            if self.job == 'Bid':
+                best_possible = BSE2_sys_consts.bse_sys_maxprice
+                worst_possible = BSE2_sys_consts.bse_sys_minprice
+            elif self.job == 'Ask':
+                best_possible = BSE2_sys_consts.bse_sys_minprice
+                worst_possible = BSE2_sys_consts.bse_sys_maxprice
+            else:
+                raise ValueError('Invalid job')
+
+
+            # sample new random number between customer limit and max.
+            rand_num = random.randint(0, abs(best_possible - self.limit))
+
             
             # calculate improvement on customer order via STGP function
-            if self.ema != None and lob['bids']['bestp'] != None and lob['asks']['bestp'] != None:
-                if self.job == 'Ask':
-                    improvement = self.trading_func(self.ema, lob['asks']['bestp'], lob['bids']['bestp'], time, countdown, self.limit)
-                elif self.job == 'Bid':
-                    improvement = self.trading_func(self.ema, lob['bids']['bestp'], lob['asks']['bestp'], time, countdown, self.limit)
-                else: 
-                    raise ValueError('Unknow job in stgp_trader : getorder.')
+            improvement = self.trading_func(ltp, best_p_same, best_p_opp, time, countdown,
+                                 self.limit, best_possible, worst_possible, rand_num)
+
 
             # reset negative improvements
             if improvement < 0:
                 improvement = 0
+            # prevent prices too large to convert float
+            if improvement > BSE2_sys_consts.bse_sys_maxprice:
+                improvement = BSE2_sys_consts.bse_sys_maxprice
             if verbose:
                 print(f"trader: {self.tid}, limit price: {self.limit}, improvement found: {improvement}")
 
@@ -122,6 +192,8 @@ class STGP_Trader(Trader):
         """ Called by the market session to notify trader of LOB updates. """
         if (trade != None):
             self._update_ema(trade["price"]) # update EMA
+            self.last_t_price = trade["price"]
+
 
     def bookkeep(self, msg, time, verbose):
         if msg.event == "FILL":

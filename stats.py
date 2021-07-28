@@ -233,11 +233,11 @@ def single_agent_efficiency(gen_length: float):
     average_total_price_first_gen = statistics.mean([x[1] for x in totals if x[0] < gen_length])
     print("average price for gen: " + str(average_total_price_first_gen))
 
-    trades_first_gen = [x for x in trader_prices['B00'] if x[0] < gen_length]
+    # trades_first_gen = [x for x in trader_prices['B00'] if x[0] < gen_length]
     # print(trades_first_gen)
     # print()
-    average_price_first_gen = statistics.mean([x[1] for x in trades_first_gen])
-    print(average_price_first_gen)
+    # average_price_first_gen = statistics.mean([x[1] for x in trades_first_gen])
+    # print(average_price_first_gen)
 
 
 
@@ -247,15 +247,15 @@ def single_agent_efficiency(gen_length: float):
 
 if __name__ == "__main__":
     # plot_stats()
-    # mean_tran_price()
+    mean_tran_price()
     # orders_prices()
     # blotter_debug()
     # plot_hof()
 
-    num_gens = 10
-    duration = 10000
-    answer = single_agent_efficiency(duration/num_gens)
-    print(answer)
+    # num_gens = 1
+    # duration = 10000
+    # answer = single_agent_efficiency(duration/num_gens)
+    # print(answer)
 
 
 

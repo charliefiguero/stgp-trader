@@ -578,7 +578,7 @@ if __name__ == "__main__":
         for i in range(experiment_setup.STGP_E_BUY):
             stgp_entities['BUY'].append(STGP_Entity(id="B_STGP_ENTITY_"+str(i), init_balance=10000, job="BUY", duration=duration))
         for i in range(experiment_setup.STGP_E_SELL):
-            stgp_entities['SELL'].append(STGP_Entity(id="S_STGP_ENTITY_"+str(i), init_balance=10000, job="BUY", duration=duration))
+            stgp_entities['SELL'].append(STGP_Entity(id="S_STGP_ENTITY_"+str(i), init_balance=10000, job="SELL", duration=duration))
 
 
     #########################################

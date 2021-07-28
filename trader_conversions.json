@@ -1,3 +1,4 @@
 {
-    "SHVR": "sub(sub(best_same, 1.0), cust_price)"
+    "SHVR": "sub(sub(best_p_same, 1.0), cust_price)",
+    "ZIC": "rand"
 }

@@ -1,5 +1,5 @@
 # general
-END_TIME = 10000.0
+END_TIME = 40000.0
 # must be atleast 1 - needs refactoring
 # BUYERS_SPEC = [('ZIP', 50),('ZIC', 50),('GVWY', 25),('SHVR', 25)] 
 # SELLERS_SPEC = [('ZIP', 50),('ZIC', 50),('GVWY', 50),('SHVR', 25)] 
@@ -7,8 +7,8 @@ END_TIME = 10000.0
 # BUYERS_SPEC =  [('ZIC', 20),('ZIP', 20)] 
 # SELLERS_SPEC = [('ZIC', 20),('ZIP', 20)] 
 
-# BUYERS_SPEC =  [('ZIC', 50)] 
-# SELLERS_SPEC = [('ZIC', 60)] 
+# BUYERS_SPEC =  [('ZIC', 10)] 
+# SELLERS_SPEC = [('ZIC', 10)] 
 
 BUYERS_SPEC =  [] 
 SELLERS_SPEC = [] 
@@ -17,14 +17,16 @@ SELLERS_SPEC = []
 
 
 # STGP Entities
+STGP_THERE = True
+
+# only currently possible to have one of each
 STGP_E_BUY = 1
 STGP_E_SELL = 1
 
 # STGP variables
-STGP_THERE = True
-NUM_TRADERS_PER_ENTITY = 10
+NUM_TRADERS_PER_ENTITY = 50
 STGP_TRADER_STARTING_BALANCE = 100
-NUM_GENS = 10
+NUM_GENS = 40
 evolving = True
 
 # probability 1 <= p <= 0

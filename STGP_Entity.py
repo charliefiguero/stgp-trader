@@ -14,10 +14,17 @@ from deap import gp, creator, base, tools, algorithms
 from BSE2_Entity import Entity
 from STGP_Trader import STGP_Trader
 import experiment_setup
+import BSE2_sys_consts
 
 
 def if_then_else(inputed, output1, output2):
     return output1 if inputed else output2
+
+def protectedDiv(left, right):
+    try:
+        return left / right
+    except ZeroDivisionError:
+        return 1
 
 
 class STGP_Entity(Entity):
@@ -58,17 +65,22 @@ class STGP_Entity(Entity):
 
     def create_deap_toolbox_and_pset(self):
         # initialise pset
-        pset = gp.PrimitiveSetTyped("main", [float, float, float, float, float, float], float)
+        pset = gp.PrimitiveSetTyped("main", [float, float, float, float, float, float, float, float, float], float)
         # inputs to the tree
-        pset.renameArguments(ARG0="ema_ind")
-        pset.renameArguments(ARG1="best_same") # same orderbook side
-        pset.renameArguments(ARG2="best_opp") # opposite orderbook side
+        pset.renameArguments(ARG0="last_t_price")
+        pset.renameArguments(ARG1="best_p_same") # same orderbook side
+        pset.renameArguments(ARG2="best_p_opp") # opposite orderbook side
         pset.renameArguments(ARG3="time")
-        pset.renameArguments(ARG4="countdown")
-        pset.renameArguments(ARG5="cust_price")
+        pset.renameArguments(ARG4="countdown") # time till end of trading period
+        pset.renameArguments(ARG5="cust_price") # customer limit price
+        pset.renameArguments(ARG6="best_possible") # system min for buy, max for sell
+        pset.renameArguments(ARG7="worst_possible") # system max for buy, min for sell
+        pset.renameArguments(ARG8="rand")
         # float operations
         pset.addPrimitive(operator.add, [float, float], float)
         pset.addPrimitive(operator.sub, [float, float], float)
+        pset.addPrimitive(operator.mul, [float, float], float)
+        pset.addPrimitive(protectedDiv, [float, float], float)
         # conditional operations 
         pset.addPrimitive(if_then_else, [bool, float, float], float)
         pset.addPrimitive(operator.lt, [float, float], bool)
@@ -80,18 +92,43 @@ class STGP_Entity(Entity):
 
         # ephemeral terminals
         # "Ephemerals with different functions should be named differently, even between psets."
-        pset.addEphemeralConstant(ephemeral_name, lambda: random.randint(-10, 10), float)
+        # hacked :()
+        if self.job == 'BUY':
+            pset.addEphemeralConstant('ephemeral_b', lambda: random.randint(-10, 10), float)
+        elif self.job == 'SELL':
+            pset.addEphemeralConstant('ephemeral_s', lambda: random.randint(-10, 10), float)
+        else:
+            raise ValueError('Entity has unknown job type. '
+            'Should be either \'BUY\' or \'SELL\'.')
 
-        # create fitness class
-        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-        # create individual class
-        creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, trader_id = None)
+
+        # ######## CREATOR CLASSES ########
+
+        # another hack for DEAP :(
+        if self.job == 'BUY':
+            # create fitness class
+            creator.create("FitnessMax_BUY", base.Fitness, weights=(1.0,))
+            # create individual class
+            creator.create("Individual_BUY", gp.PrimitiveTree, fitness=creator.FitnessMax_BUY, trader_id = None)
+
+        elif self.job == 'SELL':
+            # create fitness class
+            creator.create("FitnessMax_SELL", base.Fitness, weights=(1.0,))
+            # create individual class
+            creator.create("Individual_SELL", gp.PrimitiveTree, fitness=creator.FitnessMax_SELL, trader_id = None)
+
 
         # create toolbox
         toolbox = base.Toolbox()
         # init tools
         toolbox.register("expr", gp.genFull, pset=pset, min_=1, max_=3)
-        toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
+
+        # another hack for DEAP :(
+        if self.job == 'BUY':
+            toolbox.register("individual", tools.initIterate, creator.Individual_BUY, toolbox.expr)
+        elif self.job == 'SELL':
+            toolbox.register("individual", tools.initIterate, creator.Individual_SELL, toolbox.expr)
+
         toolbox.register("population", tools.initRepeat, list, toolbox.individual)
         # evolution tools
         toolbox.register("evaluate", self.evaluate_expr)
@@ -100,7 +137,6 @@ class STGP_Entity(Entity):
         toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
         toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
         # bloat control
-        # 
         toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
         toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
 
@@ -111,9 +147,13 @@ class STGP_Entity(Entity):
         with open('trader_conversions.json', 'r') as infile:
             traders = json.load(infile)
             shvr = traders['SHVR']
+            zic = traders['ZIC']
 
         # load in prebuilt traders 
-        loaded_inds = [creator.Individual(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(n)]
+        if self.job == 'BUY':
+            loaded_inds = [creator.Individual_BUY(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(n)]
+        elif self.job == 'SELL':
+            loaded_inds = [creator.Individual_SELL(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(n)]
 
         # self.exprs = self.toolbox.population(n)
         self.exprs = loaded_inds
@@ -149,6 +189,7 @@ class STGP_Entity(Entity):
         return map(lambda x: x.fitness.values[0], self.exprs)
 
     def evolve_population(self, time):
+
         if not experiment_setup.evolving:
             print(f'generation: {int(time / self.EVAL_TIME)}')
             profits = [tr.get_profit(time) for tr in self.traders.values()]
