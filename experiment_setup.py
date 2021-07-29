@@ -24,12 +24,12 @@ STGP_THERE = False
 
 # only currently possible to have one of each
 STGP_E_BUY = 1
-STGP_E_SELL = 0
+STGP_E_SELL = 1
 
 # STGP variables
-NUM_TRADERS_PER_ENTITY = 50
+NUM_TRADERS_PER_ENTITY = 10
 STGP_TRADER_STARTING_BALANCE = 100
-NUM_GENS = 40
+NUM_GENS = 10
 evolving = True
 
 # probability 1 <= p <= 0

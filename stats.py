@@ -240,8 +240,31 @@ def single_agent_efficiency(gen_length: float):
     # print(average_price_first_gen)
 
 
+def plot_tran_price():
 
-    
+    def line_plot(x, y):
+        _, ax = plt.subplots()
+        ax.plot(x, y)
+        ax.set_ylim(ymin=0)
+        return ax
+
+    def plot_transactions(times, prices, title=None):
+        ax = line_plot(times, prices)
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Price (£)')
+        if title != None:
+            ax.set_title(title)
+        return ax
+
+    with open('Test00tapes.csv', 'r') as infile:
+        reader = csv.reader(infile)
+        timeprice = [(row[2], row[3]) for row in reader]
+        times = [float(item[0]) for item in timeprice]
+        prices = [float(item[1]) for item in timeprice]
+
+    ax = plot_transactions(times, prices)
+    plt.show()
+
 
 
 
@@ -249,6 +272,7 @@ if __name__ == "__main__":
     # plot_stats()
     mean_tran_price()
     orders_prices()
+    plot_tran_price()
     # blotter_debug()
     # plot_hof()
 

@@ -544,6 +544,14 @@ class Trader_ZIP(Trader):
         if lob_best_bid_p is not None:
             # non-empty bid LOB
             lob_best_bid_q = lob['bids']['lob'][-1][1]
+
+            print('first:  ', lob['bids']['lob'][-1][0])
+
+            try:
+                print('second:  ', lob['bids']['lob'][0][0])
+            except:
+                pass
+            
             if self.prev_best_bid_p is None:
                 self.prev_best_bid_p = lob_best_bid_p
             elif self.prev_best_bid_p < lob_best_bid_p:
