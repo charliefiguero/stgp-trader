@@ -248,7 +248,7 @@ def single_agent_efficiency(gen_length: float):
 if __name__ == "__main__":
     # plot_stats()
     mean_tran_price()
-    # orders_prices()
+    orders_prices()
     # blotter_debug()
     # plot_hof()
 
