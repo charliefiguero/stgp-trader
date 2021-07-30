@@ -1,5 +1,5 @@
 # general
-END_TIME = 2000.0
+END_TIME = 1000.0
 # must be atleast 1 - needs refactoring
 # BUYERS_SPEC = [('ZIP', 50),('ZIC', 50),('GVWY', 25),('SHVR', 25)] 
 # SELLERS_SPEC = [('ZIP', 50),('ZIC', 50),('GVWY', 50),('SHVR', 25)] 
@@ -10,8 +10,8 @@ END_TIME = 2000.0
 # BUYERS_SPEC =  [('ZIC', 10)] 
 # SELLERS_SPEC = [('ZIC', 10)] 
 
-BUYERS_SPEC =  [('ZIP', 10)] 
-SELLERS_SPEC = [('ZIP', 10)] 
+BUYERS_SPEC =  [('ZIP', 50)] 
+SELLERS_SPEC = [('ZIP', 60)] 
 
 # BUYERS_SPEC =  [] 
 # SELLERS_SPEC = [] 
@@ -20,11 +20,11 @@ SELLERS_SPEC = [('ZIP', 10)]
 
 
 # STGP Entities
-STGP_THERE = False
+STGP_THERE = True
 
 # only currently possible to have one of each
 STGP_E_BUY = 1
-STGP_E_SELL = 1
+STGP_E_SELL = 0
 
 # STGP variables
 NUM_TRADERS_PER_ENTITY = 10
