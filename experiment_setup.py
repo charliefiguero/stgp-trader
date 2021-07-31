@@ -1,5 +1,7 @@
 # general
-END_TIME = 1000.0
+END_TIME = 5000.0
+
+NUM_TRIALS = 10
 # must be atleast 1 - needs refactoring
 # BUYERS_SPEC = [('ZIP', 50),('ZIC', 50),('GVWY', 25),('SHVR', 25)] 
 # SELLERS_SPEC = [('ZIP', 50),('ZIC', 50),('GVWY', 50),('SHVR', 25)] 
@@ -10,8 +12,8 @@ END_TIME = 1000.0
 # BUYERS_SPEC =  [('ZIC', 10)] 
 # SELLERS_SPEC = [('ZIC', 10)] 
 
-BUYERS_SPEC =  [('ZIP', 50)] 
-SELLERS_SPEC = [('ZIP', 60)] 
+BUYERS_SPEC =  [('ZIC', 50)] 
+SELLERS_SPEC = [('ZIC', 60)] 
 
 # BUYERS_SPEC =  [] 
 # SELLERS_SPEC = [] 

@@ -586,22 +586,32 @@ if __name__ == "__main__":
 
     sys.stdout.flush()
 
-    for session in range(1):
-        sess_id = 'Test%02d' % session
-        print('Session %s; ' % sess_id)
+    # use session name for tapes if provided 
+    in_trial_series = False
+    session = 0
+    if len(sys.argv) > 1:
+        in_trial_series = True
+        session = int(sys.argv[1])
+        
 
-        bal_fname = sess_id + 'balances.csv'
-        summary_data_file = open(bal_fname, 'w')
 
-        tape_fname = sess_id + 'tapes.csv'
-        tape_data_file = open(tape_fname, 'w')
+    # ####### RUN EXPERIMENT ######
 
-        blot_fname = sess_id + 'blotters.csv'
-        blotter_data_file = open(blot_fname, 'w')
+    sess_id = 'Test%02d' % session
+    print('Session %s: ' % sess_id)
 
-        market_session(sess_id, start_time, end_time, entities, stgp_entities, 
-                       traders_spec, order_sched, summary_data_file, tape_data_file,
-                       blotter_data_file, False)
+    bal_fname = "standard_csvs/" + sess_id + 'balances.csv'
+    summary_data_file = open(bal_fname, 'w')
+
+    tape_fname = "standard_csvs/" + sess_id + 'tapes.csv'
+    tape_data_file = open(tape_fname, 'w')
+
+    blot_fname = "standard_csvs/" + sess_id + 'blotters.csv'
+    blotter_data_file = open(blot_fname, 'w')
+
+    market_session(sess_id, start_time, end_time, entities, stgp_entities, 
+                    traders_spec, order_sched, summary_data_file, tape_data_file,
+                    blotter_data_file, False)
 
 
     # write stgp stats
