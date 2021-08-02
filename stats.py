@@ -152,13 +152,45 @@ def plot_hof():
         print(thawed_hof)
         draw_expr(thawed_hof)
 
-def mean_tran_price():
-    with open('Test00tapes.csv', 'r') as infile:
+def mean_tran_price(duration: int, num_gens: int, fname: str):
+
+    time_per_gen = duration/num_gens
+
+    with open(fname, 'r') as infile:
         reader = csv.reader(infile)
         timeprice = [(row[2], row[3]) for row in reader]
         prices = [float(item[1]) for item in timeprice]
 
-    return sum(prices)/len(prices)
+    print("Generational mean prices...")
+
+    gen = 0
+    trans_in_gen = 0
+    gen_total_traded = 0
+    for count, item in enumerate(timeprice):
+        time = float(item[0])
+        price = int(item[1])
+
+        # gen reset
+        while time > gen * time_per_gen:
+            if gen == 0:
+                gen += 1
+                continue
+
+            if trans_in_gen == 0:
+                print(f'Gen: {gen}, mean price = {0}')
+            else:
+                print(f'Gen: {gen}, mean price = {gen_total_traded/trans_in_gen}')
+
+            gen += 1
+            trans_in_gen = 0
+            gen_total_traded = 0
+
+        gen_total_traded += price
+        trans_in_gen += 1
+
+    print(f'Average generational price: {sum(prices)/len(prices)}\n')
+
+
 
 def blotter_debug():
     with open('Test00blotters.csv', 'r') as infile:
@@ -200,7 +232,6 @@ def single_agent_efficiency(duration: int, num_gens: int, eq_price, filename):
     trader_prices = {}
     totals = []
 
-
     # building a dictionary of every trade price for every trader
     for tape in reader:
         time = float(tape[2])
@@ -228,12 +259,12 @@ def single_agent_efficiency(duration: int, num_gens: int, eq_price, filename):
         else:
             trader_prices[buyer] = [(time, price)]
 
-
-
     # breaking trades into generations...
 
     time_per_gen = duration/num_gens
+    stgp_mean_per_gen = []
     bstgp_mean_per_gen = []
+    sstgp_mean_per_gen = []
     other_mean_per_gen = []
 
     # gen_time_prices[trader][generation]
@@ -267,12 +298,27 @@ def single_agent_efficiency(duration: int, num_gens: int, eq_price, filename):
 
     # Dict is now complete (trades per trader per generation). Now calculations...
 
-    # mean price for bstgp in this generation
-    bstgp_keys = [key for key in gen_time_prices.keys() if key.startswith('BSTGP')]
-    other_keys = [key for key in gen_time_prices.keys() if key not in bstgp_keys 
-                                                    and key.startswith('B')]
+    # # mean price for bstgp in this generation
+    # bstgp_keys = [key for key in gen_time_prices.keys() if key.startswith('BSTGP')]
+    # other_keys = [key for key in gen_time_prices.keys() if key not in bstgp_keys 
+    #                                                 and key.startswith('B')]
 
+    bstgp_keys = [key for key in gen_time_prices.keys() if key.startswith('BSTGP')]
+    sstgp_keys = [key for key in gen_time_prices.keys() if key.startswith('SSTGP')]
+    stgp_keys = bstgp_keys + sstgp_keys
+    other_keys = [key for key in gen_time_prices.keys() if key not in stgp_keys]
+
+    print("Mean transaction price for trader groups.")
     for gen_num in range(num_gens):
+
+        stgp_prices = []
+        for t in stgp_keys:
+            # print(gen_time_prices[t])
+            # print(t)
+            try:
+                stgp_prices.extend([x[1] for x in gen_time_prices[t][gen_num+1]])
+            except:
+                print(f"Trader {t} had no trades in generation {gen_num+1}.")
 
         bstgp_prices = []
         for t in bstgp_keys:
@@ -283,28 +329,76 @@ def single_agent_efficiency(duration: int, num_gens: int, eq_price, filename):
             except:
                 print(f"Trader {t} had no trades in generation {gen_num+1}.")
 
+        sstgp_prices = []
+        for t in sstgp_keys:
+            # print(gen_time_prices[t])
+            # print(t)
+            try:
+                sstgp_prices.extend([x[1] for x in gen_time_prices[t][gen_num+1]])
+            except:
+                print(f"Trader {t} had no trades in generation {gen_num+1}.")
+
         other_prices = []
         for t in other_keys:
             other_prices.extend([x[1] for x in gen_time_prices[t][gen_num+1]])
             
+        stgp_mean = statistics.mean(stgp_prices)
         bstgp_mean = statistics.mean(bstgp_prices)
+        sstgp_mean = statistics.mean(sstgp_prices)
         other_mean = statistics.mean(other_prices)
 
+        stgp_mean_per_gen.append(stgp_mean)
         bstgp_mean_per_gen.append(bstgp_mean)
+        sstgp_mean_per_gen.append(sstgp_mean)
         other_mean_per_gen.append(other_mean)
         
         # print(f"Gen {gen_num+1}: BSTGP mean = {bstgp_mean}, Others mean = {other_mean}")
-        print('Gen: {0:<4}, STGP mean = {1:<20}, Others mean = {2:<15}'
-                    .format(gen_num+1,bstgp_mean, other_mean))
+        print('Gen: {0:<4}, STGP = {1:<20}, BSTGP = {2:<20}, SSTGP = {3:<20}, Others = {4:<15}'
+                    .format(gen_num+1,stgp_mean, bstgp_mean, sstgp_mean, other_mean))
     print()
 
     # generational single agent efficiency for the stgp traders
+    print("Single Agent Efficiency:")
     generational_sae = []
     for gen_num in range(num_gens):
-        sae = eq_price/bstgp_mean_per_gen[gen_num]
-        generational_sae.append(sae)
-        print(f"Single Agent Efficiency STGP Traders, Gen {gen_num+1}: {sae}")
+        stgp_sae = eq_price/stgp_mean_per_gen[gen_num]
+        bstgp_sae = eq_price/bstgp_mean_per_gen[gen_num]
+        sstgp_sae = eq_price/sstgp_mean_per_gen[gen_num]
+        other_sae = eq_price/other_mean_per_gen[gen_num]
+
+        generational_sae.append(stgp_sae)
+        print(f"Gen {gen_num+1:<10}: STGP={stgp_sae:<20}, BSTGP={bstgp_sae:<20}, SSTGP={sstgp_sae:<20}, others={other_sae:<20}")
     return generational_sae
+
+
+
+def sae_series():
+    num_gens = 10
+    duration = 5000
+    eq_price = 100
+
+    num_trials = 10
+
+    tape_files = [f for f in os.listdir('./standard_csvs') if 'Test' in f and 'tapes' in f]
+    print(tape_files)
+
+    gen_sae_bins = {}
+    for i in range(num_trials):
+        gen_sae_bins[i+1] = []
+
+    for tape in tape_files:
+        print(tape)
+        fpath = 'standard_csvs/'+tape
+        trial_sae = single_agent_efficiency(duration, num_gens, eq_price, fpath)
+
+        # looping over the sae for the gens in the trial
+        for index, gen in enumerate(trial_sae):
+            gen_sae_bins[index+1].append(gen)
+
+    # print final bin counts
+    print(f'\n\nAverage SAE per gen over {len(tape_files)} trials.\n')
+    for item in gen_sae_bins.items():
+        print(item[0], statistics.mean(item[1]))
 
 def plot_tran_price():
 
@@ -333,37 +427,17 @@ def plot_tran_price():
 
 
 
-
 if __name__ == "__main__":
     # plot_stats()
-    # print(mean_tran_price())
 
     num_gens = 10
     duration = 5000
     eq_price = 100
+    num_trials = 1
+    fpath = "standard_csvs/Test00tapes.csv"
 
-    num_trials = 10
-
-    tape_files = [f for f in os.listdir('./standard_csvs') if 'Test' in f and 'tapes' in f]
-    print(tape_files)
-
-    gen_sae_bins = {}
-    for i in range(num_trials):
-        gen_sae_bins[i+1] = []
-
-    for tape in tape_files:
-        print(tape)
-        fpath = 'standard_csvs/'+tape
-        trial_sae = single_agent_efficiency(duration, num_gens, eq_price, fpath)
-
-        # looping over the sae for the gens in the trial
-        for index, gen in enumerate(trial_sae):
-            gen_sae_bins[index+1].append(gen)
-
-    # print final bin counts
-    print(f'\n\nAverage SAE per gen over {len(tape_files)} trials.\n')
-    for item in gen_sae_bins.items():
-        print(item[0], statistics.mean(item[1]))
+    mean_tran_price(duration, num_gens, fpath)
+    single_agent_efficiency(duration, num_gens, eq_price, fpath)
         
     # orders_prices()
     # plot_tran_price()

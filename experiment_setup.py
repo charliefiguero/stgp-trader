@@ -1,10 +1,14 @@
 # general
 END_TIME = 5000.0
 
+# must be atleast 1
 NUM_TRIALS = 10
-# must be atleast 1 - needs refactoring
+
 # BUYERS_SPEC = [('ZIP', 50),('ZIC', 50),('GVWY', 25),('SHVR', 25)] 
 # SELLERS_SPEC = [('ZIP', 50),('ZIC', 50),('GVWY', 50),('SHVR', 25)] 
+
+BUYERS_SPEC = [('ZIP', 20),('ZIC', 20),('GVWY', 20),('SHVR', 20)] 
+SELLERS_SPEC = [('ZIP', 20),('ZIC', 20),('GVWY', 20),('SHVR', 20)] 
 
 # BUYERS_SPEC =  [('ZIC', 20),('ZIP', 20)] 
 # SELLERS_SPEC = [('ZIC', 20),('ZIP', 20)] 
@@ -12,8 +16,8 @@ NUM_TRIALS = 10
 # BUYERS_SPEC =  [('ZIC', 10)] 
 # SELLERS_SPEC = [('ZIC', 10)] 
 
-BUYERS_SPEC =  [('ZIC', 50)] 
-SELLERS_SPEC = [('ZIC', 60)] 
+# BUYERS_SPEC =  [('ZIC', 50)] 
+# SELLERS_SPEC = [('ZIC', 60)] 
 
 # BUYERS_SPEC =  [] 
 # SELLERS_SPEC = [] 
@@ -26,7 +30,7 @@ STGP_THERE = True
 
 # only currently possible to have one of each
 STGP_E_BUY = 1
-STGP_E_SELL = 0
+STGP_E_SELL = 1
 
 # STGP variables
 NUM_TRADERS_PER_ENTITY = 10
