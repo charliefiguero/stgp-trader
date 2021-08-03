@@ -262,15 +262,7 @@ def single_agent_efficiency(duration: int, num_gens: int, eq_price, filename):
     # breaking trades into generations...
 
     time_per_gen = duration/num_gens
-    stgp_mean_per_gen = []
-    bstgp_mean_per_gen = []
-    sstgp_mean_per_gen = []
-    other_mean_per_gen = []
 
-    stgp_mean_sea_per_gen = []
-    bstgp_mean_sea_per_gen = []
-    sstgp_mean_sea_per_gen = []
-    other_mean_sea_per_gen = []
 
     # gen_time_prices[trader][generation]
     gen_time_prices = {}
@@ -303,75 +295,55 @@ def single_agent_efficiency(duration: int, num_gens: int, eq_price, filename):
 
     # Dict is now complete (trades per trader per generation). Now calculations...
 
-    # # mean price for bstgp in this generation
-    # bstgp_keys = [key for key in gen_time_prices.keys() if key.startswith('BSTGP')]
-    # other_keys = [key for key in gen_time_prices.keys() if key not in bstgp_keys 
-    #                                                 and key.startswith('B')]
+    stgp_mean_sea_per_gen = []
+    bstgp_mean_sea_per_gen = []
+    sstgp_mean_sea_per_gen = []
+    other_mean_sea_per_gen = []
 
     bstgp_keys = [key for key in gen_time_prices.keys() if key.startswith('BSTGP')]
     sstgp_keys = [key for key in gen_time_prices.keys() if key.startswith('SSTGP')]
     stgp_keys = bstgp_keys + sstgp_keys
     other_keys = [key for key in gen_time_prices.keys() if key not in stgp_keys]
 
-    print("Mean single agent efficiency for trader groups.")
+    print("Mean single agent efficiency per generation.")
     for gen_num in range(num_gens):
 
-        stgp_prices = []
         stgp_sae = []
         for t in stgp_keys:
             try:
                 t_trades = [x[1] for x in gen_time_prices[t][gen_num+1]]
-                stgp_prices.extend(t_trades)
-                stgp_sae.extend(sum(t_trades)/(len(t_trades)*100))
+                stgp_sae.append(sum(t_trades)/(len(t_trades)*100))
             except:
                 print(f"Trader {t} had no trades in generation {gen_num+1}.")
 
-        bstgp_prices = []
         bstgp_sae = []
         for t in bstgp_keys:
             try:
                 t_trades = [x[1] for x in gen_time_prices[t][gen_num+1]]
-                bstgp_prices.extend(t_trades)
-                bstgp_sae.extend(sum(t_trades)/(len(t_trades)*100))
+                bstgp_sae.append(sum(t_trades)/(len(t_trades)*100))
             except:
                 print(f"Trader {t} had no trades in generation {gen_num+1}.")
 
-        sstgp_prices = []
         sstgp_sae = []
         for t in sstgp_keys:
             try:
                 t_trades = [x[1] for x in gen_time_prices[t][gen_num+1]]
-                sstgp_prices.extend(t_trades)
-                sstgp_sae.extend(sum(t_trades)/(len(t_trades)*100))
+                sstgp_sae.append(sum(t_trades)/(len(t_trades)*100))
             except:
                 print(f"Trader {t} had no trades in generation {gen_num+1}.")
 
-        other_prices = []
         other_sae = []
         for t in other_keys:
             try:
                 t_trades = [x[1] for x in gen_time_prices[t][gen_num+1]]
-                other_prices.extend(t_trades)
-                other_sae.extend(sum(t_trades)/(len(t_trades)*100))
+                other_sae.append(sum(t_trades)/(len(t_trades)*100))
             except:
                 print(f"Trader {t} had no trades in generation {gen_num+1}.")
-            
-        stgp_mean_p = statistics.mean(stgp_prices)
-        bstgp_mean_p = statistics.mean(bstgp_prices)
-        sstgp_mean_p = statistics.mean(sstgp_prices)
-        other_mean_p = statistics.mean(other_prices)
 
         stgp_mean_sae = statistics.mean(stgp_sae)
         bstgp_mean_sae = statistics.mean(bstgp_sae)
         sstgp_mean_sae = statistics.mean(sstgp_sae)
         other_mean_sae = statistics.mean(other_sae)
-
-        
-
-        stgp_mean_per_gen.append(stgp_mean_p)
-        bstgp_mean_per_gen.append(bstgp_mean_p)
-        sstgp_mean_per_gen.append(sstgp_mean_p)
-        other_mean_per_gen.append(other_mean_p)
 
         stgp_mean_sea_per_gen.append(stgp_mean_sae)
         bstgp_mean_sea_per_gen.append(bstgp_mean_sae)
