@@ -267,6 +267,11 @@ def single_agent_efficiency(duration: int, num_gens: int, eq_price, filename):
     sstgp_mean_per_gen = []
     other_mean_per_gen = []
 
+    stgp_mean_sea_per_gen = []
+    bstgp_mean_sea_per_gen = []
+    sstgp_mean_sea_per_gen = []
+    other_mean_sea_per_gen = []
+
     # gen_time_prices[trader][generation]
     gen_time_prices = {}
 
@@ -308,68 +313,74 @@ def single_agent_efficiency(duration: int, num_gens: int, eq_price, filename):
     stgp_keys = bstgp_keys + sstgp_keys
     other_keys = [key for key in gen_time_prices.keys() if key not in stgp_keys]
 
-    print("Mean transaction price for trader groups.")
+    print("Mean single agent efficiency for trader groups.")
     for gen_num in range(num_gens):
 
         stgp_prices = []
+        stgp_sae = []
         for t in stgp_keys:
-            # print(gen_time_prices[t])
-            # print(t)
             try:
-                stgp_prices.extend([x[1] for x in gen_time_prices[t][gen_num+1]])
+                t_trades = [x[1] for x in gen_time_prices[t][gen_num+1]]
+                stgp_prices.extend(t_trades)
+                stgp_sae.extend(sum(t_trades)/(len(t_trades)*100))
             except:
                 print(f"Trader {t} had no trades in generation {gen_num+1}.")
 
         bstgp_prices = []
+        bstgp_sae = []
         for t in bstgp_keys:
-            # print(gen_time_prices[t])
-            # print(t)
             try:
-                bstgp_prices.extend([x[1] for x in gen_time_prices[t][gen_num+1]])
+                t_trades = [x[1] for x in gen_time_prices[t][gen_num+1]]
+                bstgp_prices.extend(t_trades)
+                bstgp_sae.extend(sum(t_trades)/(len(t_trades)*100))
             except:
                 print(f"Trader {t} had no trades in generation {gen_num+1}.")
 
         sstgp_prices = []
+        sstgp_sae = []
         for t in sstgp_keys:
-            # print(gen_time_prices[t])
-            # print(t)
             try:
-                sstgp_prices.extend([x[1] for x in gen_time_prices[t][gen_num+1]])
+                t_trades = [x[1] for x in gen_time_prices[t][gen_num+1]]
+                sstgp_prices.extend(t_trades)
+                sstgp_sae.extend(sum(t_trades)/(len(t_trades)*100))
             except:
                 print(f"Trader {t} had no trades in generation {gen_num+1}.")
 
         other_prices = []
+        other_sae = []
         for t in other_keys:
-            other_prices.extend([x[1] for x in gen_time_prices[t][gen_num+1]])
+            try:
+                t_trades = [x[1] for x in gen_time_prices[t][gen_num+1]]
+                other_prices.extend(t_trades)
+                other_sae.extend(sum(t_trades)/(len(t_trades)*100))
+            except:
+                print(f"Trader {t} had no trades in generation {gen_num+1}.")
             
-        stgp_mean = statistics.mean(stgp_prices)
-        bstgp_mean = statistics.mean(bstgp_prices)
-        sstgp_mean = statistics.mean(sstgp_prices)
-        other_mean = statistics.mean(other_prices)
+        stgp_mean_p = statistics.mean(stgp_prices)
+        bstgp_mean_p = statistics.mean(bstgp_prices)
+        sstgp_mean_p = statistics.mean(sstgp_prices)
+        other_mean_p = statistics.mean(other_prices)
 
-        stgp_mean_per_gen.append(stgp_mean)
-        bstgp_mean_per_gen.append(bstgp_mean)
-        sstgp_mean_per_gen.append(sstgp_mean)
-        other_mean_per_gen.append(other_mean)
+        stgp_mean_sae = statistics.mean(stgp_sae)
+        bstgp_mean_sae = statistics.mean(bstgp_sae)
+        sstgp_mean_sae = statistics.mean(sstgp_sae)
+        other_mean_sae = statistics.mean(other_sae)
+
+        
+
+        stgp_mean_per_gen.append(stgp_mean_p)
+        bstgp_mean_per_gen.append(bstgp_mean_p)
+        sstgp_mean_per_gen.append(sstgp_mean_p)
+        other_mean_per_gen.append(other_mean_p)
+
+        stgp_mean_sea_per_gen.append(stgp_mean_sae)
+        bstgp_mean_sea_per_gen.append(bstgp_mean_sae)
+        sstgp_mean_sea_per_gen.append(sstgp_mean_sae)
+        other_mean_sea_per_gen.append(other_mean_sae)
         
         # print(f"Gen {gen_num+1}: BSTGP mean = {bstgp_mean}, Others mean = {other_mean}")
         print('Gen: {0:<4}, STGP = {1:<20}, BSTGP = {2:<20}, SSTGP = {3:<20}, Others = {4:<15}'
-                    .format(gen_num+1,stgp_mean, bstgp_mean, sstgp_mean, other_mean))
-    print()
-
-    # generational single agent efficiency for the stgp traders
-    print("Single Agent Efficiency:")
-    generational_sae = []
-    for gen_num in range(num_gens):
-        stgp_sae = eq_price/stgp_mean_per_gen[gen_num]
-        bstgp_sae = eq_price/bstgp_mean_per_gen[gen_num]
-        sstgp_sae = eq_price/sstgp_mean_per_gen[gen_num]
-        other_sae = eq_price/other_mean_per_gen[gen_num]
-
-        generational_sae.append(stgp_sae)
-        print(f"Gen {gen_num+1:<10}: STGP={stgp_sae:<20}, BSTGP={bstgp_sae:<20}, SSTGP={sstgp_sae:<20}, others={other_sae:<20}")
-    return generational_sae
-
+                    .format(gen_num+1,stgp_mean_sae, bstgp_mean_sae, sstgp_mean_sae, other_mean_sae))
 
 
 def sae_series():
