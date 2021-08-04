@@ -381,6 +381,7 @@ class Orderbook_half:
             best_lob_price = self.lob[0][0]
             best_lob_orders = self.lob[0][1]
             best_lob_order = best_lob_orders[0]
+
             best_lob_order_qty = best_lob_order[1]
             best_lob_order_tid = best_lob_order[2]
             best_lob_order_oid = best_lob_order[3]
@@ -394,7 +395,8 @@ class Orderbook_half:
 
             if verbose:
                 print('BK_TAKE: best_lob _price=%d _order=%s qty=%d oid_from=%d oid_to=%d tid_from=%s tid_to=%s\n' %
-                      (best_lob_price, best_lob_order, best_lob_order_qty, oid_from, oid_to, tid_from, tid_to))
+                        (best_lob_price, best_lob_order, best_lob_order_qty, oid_from, oid_to, tid_from, tid_to))
+            
 
             # walk the book: does this order consume current best order on book?
             if best_lob_order_qty >= qty_remaining:

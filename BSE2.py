@@ -177,7 +177,7 @@ def populate_market(entities, stgp_entities, traders_specification, traders, shu
 
 # one session in the market
 def market_session(session_id, starttime, endtime, entities, stgp_entities, trader_spec, order_schedule, summaryfile, tapedumpfile,
-                   blotterdumpfile, verbose):
+                   blotterdumpfile, profitdumpfile, verbose):
 
     start = perf_counter()
 
@@ -197,6 +197,23 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
                 csv = csv + f"{str(b[0])}|" 
             blotdumpfile.write(
                 '%s, %s, %s, %s, %s, %s\n' % (session_id, trader_id, ttype, balance, blot_len, csv))
+
+    def profitdump(all_traders, profitdumpfile):
+        # traders dump their blotters
+        print("dumping profit")
+        for tr in all_traders:
+            trader_id = all_traders[tr].tid
+            ttype = all_traders[tr].ttype
+            profit_tape = all_traders[tr].profit_tape
+            profit_len = len(profit_tape)
+            # build csv string for all events in blotter
+            csv = ''
+            for b in profit_tape:
+                # csv = csv + '\"%s\", %s, ' % (str(b[0]), b[1])
+                # 
+                csv = csv + f", {str(b[0])} {str(b[1])} {str(b[2])} {str(b[3])}" 
+            profitdumpfile.write(
+                '%s, %s, %s, %s%s\n' % (session_id, trader_id, ttype, profit_len, csv))
 
     def process_kills(kill_list, all_traders, verboseness):
         # if any newly-issued customer orders means any trader's quotes on the LOB need to be cancelled, kill them
@@ -504,6 +521,7 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
 
     # traders dump their blotters
     blotterdump(traders, blotterdumpfile)
+    profitdump(traders, profitdumpfile)
 
     # write summary trade_stats for this experiment (end-of-session summary ONLY)
     for e in range(n_exchanges):
@@ -609,9 +627,12 @@ if __name__ == "__main__":
     blot_fname = "standard_csvs/" + sess_id + 'blotters.csv'
     blotter_data_file = open(blot_fname, 'w')
 
+    profit_fname = "standard_csvs/" + sess_id + 'profit.csv'
+    profit_data_file = open(profit_fname, 'w')
+
     market_session(sess_id, start_time, end_time, entities, stgp_entities, 
                     traders_spec, order_sched, summary_data_file, tape_data_file,
-                    blotter_data_file, False)
+                    blotter_data_file, profit_data_file, False)
 
 
     # write stgp stats

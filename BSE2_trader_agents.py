@@ -27,6 +27,7 @@ class Trader:
         self.n_trades = 0  # how many trades has this trader done?
         self.lastquote = None  # record of what its most recent quote was/is (incl price)
         self.paramvec = []  # vector of parameter values -- stored separately for switching between strategies
+        self.profit_tape = []
 
     def __str__(self):
         blotterstring = '['
@@ -162,6 +163,17 @@ class Trader:
                 else:
                     profit = (transactionprice - limitprice) * qty
 
+
+                cp = self.orders[0].price
+                tprice = transactionprice
+                diff = 0
+                if exch_order.otype == 'Bid':
+                    diff = cp - tprice
+                else:
+                    diff = tprice - cp
+
+                self.profit_tape.append((time, diff, self.orders[0].price, transactionprice))
+
                 self.balance += profit
                 self.n_trades += 1
                 age = time - self.birthtime
@@ -211,7 +223,7 @@ class Trader:
                         print("PART-filled IOC cancels remainder: deleting OID:%d from trader's exchange-order records"
                               % exch_order.orderid)
                     self.del_exch_order(exch_order.orderid, verbose)  # delete the exchange-order from trader's records
-
+        
         self.blotter.append([msg, self.balance])  # add trade record to trader's blotter
 
     # specify how trader responds to events in the market
