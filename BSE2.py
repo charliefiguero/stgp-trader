@@ -550,12 +550,12 @@ if __name__ == "__main__":
 
     # range1 = (95, 95, [bronco_schedule_offsetfn, [] ] )
     # range1 = (50, 150)
-    range1 = (50, 50)
+    range1 = (50, 100)
     supply_schedule = [{'from': start_time, 'to': end_time, 'ranges': [range1], 'stepmode': 'fixed'}]
 
     # range1 = (105, 105, [bronco_schedule_offsetfn, [] ] )
     # range1 = (50, 150)
-    range2 = (150, 150)
+    range2 = (100, 150)
     demand_schedule = [{'from': start_time, 'to': end_time, 'ranges': [range2], 'stepmode': 'fixed'}]
 
     order_sched = {'sup': supply_schedule, 'dem': demand_schedule,
@@ -586,23 +586,7 @@ if __name__ == "__main__":
             print(entity)
 
 
-    ############ Add STGP entities ############
-
-
-    stgp_there = experiment_setup.STGP_THERE
-    stgp_entities = {'BUY': [], 'SELL': []}
-
-    if stgp_there:
-        for i in range(experiment_setup.STGP_E_BUY):
-            stgp_entities['BUY'].append(STGP_Entity(id="B_STGP_ENTITY_"+str(i), init_balance=10000, job="BUY", duration=duration))
-        for i in range(experiment_setup.STGP_E_SELL):
-            stgp_entities['SELL'].append(STGP_Entity(id="S_STGP_ENTITY_"+str(i), init_balance=10000, job="SELL", duration=duration))
-
-
-    #########################################
-
-
-    sys.stdout.flush()
+    # set up session numbers
 
     # use session name for tapes if provided 
     in_trial_series = False
@@ -610,9 +594,36 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         in_trial_series = True
         session = int(sys.argv[1])
+
+
+
+    ############ Add STGP entities ############
+
+
+    stgp_there = experiment_setup.STGP_THERE
+    stgp_entities = {'BUY': [], 'SELL': []}
+
+
+    boffspringf = "offspring_records/boffspring" + str(session) + ".txt"
+    soffspringf = "offspring_records/soffspring" + str(session) + ".txt"
+
+    if stgp_there:
+        for i in range(experiment_setup.STGP_E_SELL):
+            stgp_entities['SELL'].append(STGP_Entity(id="S_STGP_ENTITY_"+str(i),
+                 init_balance=10000, job="SELL", duration=duration,
+                offspring_file=soffspringf))
+        for i in range(experiment_setup.STGP_E_BUY):
+            stgp_entities['BUY'].append(STGP_Entity(id="B_STGP_ENTITY_"+str(i),
+                 init_balance=10000, job="BUY", duration=duration, 
+                offspring_file=boffspringf))
+
+
+    #########################################
+
+
+    sys.stdout.flush()
+
         
-
-
     # ####### RUN EXPERIMENT ######
 
     sess_id = 'Test%02d' % session

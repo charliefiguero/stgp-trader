@@ -29,7 +29,7 @@ def protectedDiv(left, right):
 
 class STGP_Entity(Entity):
 
-    def __init__(self, id, init_balance, job, duration):
+    def __init__(self, id, init_balance, job, duration, offspring_file):
         super().__init__(id, init_balance, 0, {})
 
         if job != 'BUY' and job != 'SELL':
@@ -39,6 +39,11 @@ class STGP_Entity(Entity):
 
         self.pset, self.toolbox = self.create_deap_toolbox_and_pset()
         self.exprs = [] # gp trees that are evolved
+        self.offspring_file = offspring_file
+        # reset offspring_file
+        with open(self.offspring_file, 'w') as f:
+            f.write('')
+        self.gen = 1
 
         # for logging
         self.stats = tools.Statistics(key=lambda ind: ind.fitness.values)
@@ -158,6 +163,8 @@ class STGP_Entity(Entity):
         # self.exprs = self.toolbox.population(n)
         self.exprs = loaded_inds
 
+        self.write_to_offspring_file(self.gen)
+
         # self.prv_exprs.append(deepcopy(self.exprs))
 
         for count, expr in enumerate(self.exprs):
@@ -202,6 +209,9 @@ class STGP_Entity(Entity):
             for trader in self.traders.values():
                 trader.reset_gen_profits()
             return
+
+
+        # Normal evolution
 
         print(f"Evolving population for {self.lei}, generation: {int(time / self.EVAL_TIME)}")
 
@@ -262,6 +272,12 @@ class STGP_Entity(Entity):
 
         # The population is entirely replaced by the offspring
         self.exprs[:] = offspring
+
+        self.gen += 1
+        self.write_to_offspring_file(self.gen)
+
+        print(gp.PrimitiveTree(offspring[0]))
+
         self.update_trader_expr(time)
 
         # reset trader stats for profit eval 
@@ -337,6 +353,13 @@ class STGP_Entity(Entity):
             for tree in self.hall_of_fame:
                 output = gp.PrimitiveTree(tree)
                 pickle.dump(output, outfile)
+
+    def write_to_offspring_file(self, gen):
+        with open(self.offspring_file, 'a') as f:
+            f.write(f"Gen: {gen}\n")
+            for e in self.exprs:
+                f.write(str(gp.PrimitiveTree(e)) + '\n')
+            f.write("\n")
 
 
 if __name__ == "__main__":

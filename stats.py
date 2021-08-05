@@ -224,135 +224,74 @@ def orders_prices():
 
     print(len(s_orders))
 
-# def single_agent_efficiency(duration: int, num_gens: int, eq_price, filename):
+def genprofit(duration: int, num_gens: int, eq_price, filename):
 
-#     with open(filename, 'r') as infile:
-#         reader = list(csv.reader(infile))
-    
-#     trader_prices = {}
-#     totals = []
+    with open(filename, 'r') as infile:
+        reader = list(csv.reader(infile))
 
-#     # building a dictionary of every trade price for every trader
-#     for tape in reader:
-#         time = float(tape[2])
-#         price = int(tape[3])
+    time_per_gen = duration / num_gens
+    eq_price = 100
 
-#         totals.append((time,price))
+    trader_profit = {}
 
-#         tran = tape[4:]
-#         for i in range(len(tran)):
-#             if i == len(tran)-1:
-#                 break
-#             tran[i] = tran[i] + ','
-#         tran = ast.literal_eval("".join(tran)[1:])
+    # 1 trader per row
+    for row in reader:
+        tid = row[1][1:]
+        ttype = row[2]
+        num_trades = row[3]
+        trades = [list(map(float, x[1:].split(' '))) for x in row[4:]]
+
+        trader_profit[tid] = {}
+
+        gen = 0
+        for t in trades:
+            time = t[0]
+            profit = t[1]
+
+            while time > gen * time_per_gen: 
+                gen += 1
+                trader_profit[tid][gen] = []
+            
+            trader_profit[tid][gen].append(profit)
+
+        # create generation arrays for generations with no trades
+        if len(trader_profit[tid]) < num_gens:
+            while duration > gen * time_per_gen: 
+                gen += 1
+                trader_profit[tid][gen] = []
+
+    BSTGP_keys = [x for x in trader_profit.keys() if "BSTGP" in x]
+    SSTGP_keys = [x for x in trader_profit.keys() if "SSTGP" in x]
+    BOTHER_keys = [x for x in trader_profit.keys() if "B" in x and x not in BSTGP_keys]
+    SOTHER_keys = [x for x in trader_profit.keys() if "S" in x and x not in SSTGP_keys and x not in BSTGP_keys]
+
+    def group_gen_profit(keys, gen):
+        total_profit = 0
+        for tkey in keys:
+            total_profit += sum(trader_profit[tkey][gen])
+        return total_profit
+
+    BSTGP_gen_profit  = []
+    SSTGP_gen_profit  = []
+    BOTHER_gen_profit = []
+    SOTHER_gen_profit = []
+
+    print("Generational Profit...")
+    for gen in range(1, num_gens+1):
         
-#         seller = tran['party1']
-#         buyer = tran['party2']
+        BSTGP_profit = group_gen_profit(BSTGP_keys, gen)
+        SSTGP_profit = group_gen_profit(SSTGP_keys, gen)
+        BOTHER_profit = group_gen_profit(BOTHER_keys, gen)
+        SOTHER_profit = group_gen_profit(SOTHER_keys, gen)
 
-#         if seller in trader_prices:
-#             trader_prices[seller].append((time, price))
-#         else:
-#             trader_prices[seller] = [(time, price)]
+        BSTGP_gen_profit.append(BSTGP_profit) 
+        SSTGP_gen_profit.append(SSTGP_profit) 
+        BOTHER_gen_profit.append(BOTHER_profit)
+        SOTHER_gen_profit.append(SOTHER_profit)
 
-#         if buyer in trader_prices:
-#             trader_prices[buyer].append((time, price))
-#         else:
-#             trader_prices[buyer] = [(time, price)]
+        print(f"Gen {gen:<10}: BSTGP={BSTGP_profit:<20}, SSTGP={SSTGP_profit:<20}, BOTHER={BOTHER_profit:<20}, SOTHER={SOTHER_profit:<20}")
 
-#     # breaking trades into generations...
-
-#     time_per_gen = duration/num_gens
-
-
-#     # gen_time_prices[trader][generation]
-#     gen_time_prices = {}
-
-#     # iterate through traders in generation
-#     for item in trader_prices.items():
-#         trader_name = item[0]
-#         trader_trans = item[1]
-#         gen_time_prices[trader_name] = {}
-#         gen = 0
-
-#         # iterate through traders trades
-#         for timeprice in trader_trans:
-#             time = timeprice[0]
-#             price = timeprice[1]
-
-#             # trade takes place in next generation
-#             if time > gen * time_per_gen:
-#                 gen += 1
-#                 gen_time_prices[trader_name][gen] = []
-
-#             gen_time_prices[trader_name][gen].append(timeprice)
-
-#     # check num_gens in function arguments match what is found
-#     atrader = list(gen_time_prices.values())[0]
-#     if len(atrader.keys()) != num_gens:
-#         raise ValueError('number of gens or duration does not match experiment.'
-#                         'num_gens in dictionary = %s', len(atrader.keys))
-
-
-#     # Dict is now complete (trades per trader per generation). Now calculations...
-
-#     stgp_mean_sea_per_gen = []
-#     bstgp_mean_sea_per_gen = []
-#     sstgp_mean_sea_per_gen = []
-#     other_mean_sea_per_gen = []
-
-#     bstgp_keys = [key for key in gen_time_prices.keys() if key.startswith('BSTGP')]
-#     sstgp_keys = [key for key in gen_time_prices.keys() if key.startswith('SSTGP')]
-#     stgp_keys = bstgp_keys + sstgp_keys
-#     other_keys = [key for key in gen_time_prices.keys() if key not in stgp_keys]
-
-#     print("Mean single agent efficiency per generation.")
-#     for gen_num in range(num_gens):
-
-#         stgp_sae = []
-#         for t in stgp_keys:
-#             try:
-#                 t_trades = [x[1] for x in gen_time_prices[t][gen_num+1]]
-#                 stgp_sae.append(sum(t_trades)/(len(t_trades)*100))
-#             except:
-#                 print(f"Trader {t} had no trades in generation {gen_num+1}.")
-
-#         bstgp_sae = []
-#         for t in bstgp_keys:
-#             try:
-#                 t_trades = [x[1] for x in gen_time_prices[t][gen_num+1]]
-#                 bstgp_sae.append(sum(t_trades)/(len(t_trades)*100))
-#             except:
-#                 print(f"Trader {t} had no trades in generation {gen_num+1}.")
-
-#         sstgp_sae = []
-#         for t in sstgp_keys:
-#             try:
-#                 t_trades = [x[1] for x in gen_time_prices[t][gen_num+1]]
-#                 sstgp_sae.append(sum(t_trades)/(len(t_trades)*100))
-#             except:
-#                 print(f"Trader {t} had no trades in generation {gen_num+1}.")
-
-#         other_sae = []
-#         for t in other_keys:
-#             try:
-#                 t_trades = [x[1] for x in gen_time_prices[t][gen_num+1]]
-#                 other_sae.append(sum(t_trades)/(len(t_trades)*100))
-#             except:
-#                 print(f"Trader {t} had no trades in generation {gen_num+1}.")
-
-#         stgp_mean_sae = statistics.mean(stgp_sae)
-#         bstgp_mean_sae = statistics.mean(bstgp_sae)
-#         sstgp_mean_sae = statistics.mean(sstgp_sae)
-#         other_mean_sae = statistics.mean(other_sae)
-
-#         stgp_mean_sea_per_gen.append(stgp_mean_sae)
-#         bstgp_mean_sea_per_gen.append(bstgp_mean_sae)
-#         sstgp_mean_sea_per_gen.append(sstgp_mean_sae)
-#         other_mean_sea_per_gen.append(other_mean_sae)
-        
-#         # print(f"Gen {gen_num+1}: BSTGP mean = {bstgp_mean}, Others mean = {other_mean}")
-#         print('Gen: {0:<4}, STGP = {1:<20}, BSTGP = {2:<20}, SSTGP = {3:<20}, Others = {4:<15}'
-#                     .format(gen_num+1,stgp_mean_sae, bstgp_mean_sae, sstgp_mean_sae, other_mean_sae))
+    return BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit
 
 def sae(duration: int, num_gens: int, eq_price, filename):
     with open(filename, 'r') as infile:
@@ -365,7 +304,7 @@ def sae(duration: int, num_gens: int, eq_price, filename):
 
     # 1 trader per row
     for row in reader:
-        tid = row[1]
+        tid = row[1][1:]
         ttype = row[2]
         num_trades = row[3]
         trades = [list(map(float, x[1:].split(' '))) for x in row[4:]]
@@ -399,7 +338,7 @@ def sae(duration: int, num_gens: int, eq_price, filename):
     BSTGP_keys = [x for x in trader_profit.keys() if "BSTGP" in x]
     SSTGP_keys = [x for x in trader_profit.keys() if "SSTGP" in x]
     BOTHER_keys = [x for x in trader_profit.keys() if "B" in x and x not in BSTGP_keys]
-    SOTHER_keys = [x for x in trader_profit.keys() if "S" in x and x not in SSTGP_keys]
+    SOTHER_keys = [x for x in trader_profit.keys() if "S" in x and x not in SSTGP_keys and x not in BSTGP_keys]
 
     def group_gen_sae(keys, gen):
         actualprofits = 0
@@ -410,7 +349,12 @@ def sae(duration: int, num_gens: int, eq_price, filename):
                 actualprofits += trade[0]
                 expectedprofits += trade[1]
 
-        return actualprofits / expectedprofits
+        return (actualprofits + 1) / (expectedprofits + 1)
+
+    BSTGP_gen_sae  = []
+    SSTGP_gen_sae  = []
+    BOTHER_gen_sae = []
+    SOTHER_gen_sae = []
 
     print("Generational SAE...")
     for gen in range(1, num_gens+1):
@@ -420,11 +364,20 @@ def sae(duration: int, num_gens: int, eq_price, filename):
         BOTHER_sae = group_gen_sae(BOTHER_keys, gen)
         SOTHER_sae = group_gen_sae(SOTHER_keys, gen)
 
+        BSTGP_gen_sae.append(BSTGP_sae) 
+        SSTGP_gen_sae.append(SSTGP_sae) 
+        BOTHER_gen_sae.append(BOTHER_sae)
+        SOTHER_gen_sae.append(SOTHER_sae)
+
         print(f"Gen {gen:<10}: BSTGP={BSTGP_sae:<20}, SSTGP={SSTGP_sae:<20}, BOTHER={BOTHER_sae:<20}, SOTHER={SOTHER_sae:<20}")
+
+    return BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae
+
+    
     
 
 def sae_series():
-    num_gens = 10
+    num_gens = 20
     duration = 5000
     eq_price = 100
 
@@ -476,21 +429,51 @@ def plot_tran_price():
     ax = plot_transactions(times, prices)
     plt.show()
 
+def plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae):
+
+    def line_plot(ax, x, y):
+        ax.plot(x, y)
+        ax.set_ylim(ymin=0)
+
+    def plot_transactions(times, prices, title=None):
+        ax = line_plot(times, prices)
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Price (£)')
+        if title != None:
+            ax.set_title(title)
+        return ax
+
+    _, ax = plt.subplots()
+
+    gens_range = range(1, num_gens+1)
+    expected_sae = [1]*num_gens
+    ax.plot(gens_range, expected_sae, ":k")
+    ax.plot(gens_range, BSTGP_gen_sae, "-b")
+    ax.plot(gens_range, SSTGP_gen_sae, "-r")
+    ax.plot(gens_range, BOTHER_gen_sae, "--b")
+    ax.plot(gens_range, SOTHER_gen_sae, "--r")
+    plt.show()
+    
+
 
 
 if __name__ == "__main__":
     # plot_stats()
 
-    num_gens = 10
+    num_gens = 20
     duration = 5000
     eq_price = 100
     num_trials = 1
     fpath = "standard_csvs/Test00tapes.csv"
 
-    # mean_tran_price(duration, num_gens, fpath)
     # single_agent_efficiency(duration, num_gens, eq_price, fpath)
 
-    sae(500, 10, 100, "standard_csvs/Test00profit.csv")
+    mean_tran_price(duration, num_gens, fpath)
+    BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae = sae(duration, num_gens, eq_price, "standard_csvs/Test00profit.csv")
+    # plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae)
+    
+
+    BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae = genprofit(duration, num_gens, eq_price, "standard_csvs/Test00profit.csv") 
 
         
     # orders_prices()

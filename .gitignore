@@ -20,6 +20,9 @@ stgp_csvs/generational_best/*
 networth_plots/*
 !networth_plots/.gitkeep
 
+offspring_records/*
+!offspring_records/.gitkeep
+
 trees/*
 !trees/.gitkeep
 
