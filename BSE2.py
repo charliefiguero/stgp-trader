@@ -528,6 +528,7 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
         trade_stats(session_id, traders, summaryfile, time, exchanges[e].publish_lob(time, None, lob_verbose))
 
     end = perf_counter()
+
     print(f"Market session took {end-start} seconds.")
 
 
@@ -551,12 +552,12 @@ if __name__ == "__main__":
     # range1 = (95, 95, [bronco_schedule_offsetfn, [] ] )
     # range1 = (50, 150)
     range1 = (50, 100)
-    supply_schedule = [{'from': start_time, 'to': end_time, 'ranges': [range1], 'stepmode': 'fixed'}]
+    supply_schedule = [{'from': start_time, 'to': end_time, 'ranges': [range1], 'stepmode': 'random'}]
 
     # range1 = (105, 105, [bronco_schedule_offsetfn, [] ] )
     # range1 = (50, 150)
     range2 = (100, 150)
-    demand_schedule = [{'from': start_time, 'to': end_time, 'ranges': [range2], 'stepmode': 'fixed'}]
+    demand_schedule = [{'from': start_time, 'to': end_time, 'ranges': [range2], 'stepmode': 'random'}]
 
     order_sched = {'sup': supply_schedule, 'dem': demand_schedule,
                    'interval': 20,
@@ -650,7 +651,7 @@ if __name__ == "__main__":
     # if stgp_there:
     #     stgp_e.total_gen_profits()
     #     stgp_e.write_total_gen_profits()
-    #     stgp_e.write_gen_records()
+        # stgp_e.write_gen_records()
     #     stgp_e.write_hof()
 
     

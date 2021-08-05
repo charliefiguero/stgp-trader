@@ -156,9 +156,24 @@ class STGP_Entity(Entity):
 
         # load in prebuilt traders 
         if self.job == 'BUY':
-            loaded_inds = [creator.Individual_BUY(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(n)]
+            bzic_ratio = 1/2
+            bshvr_ratio = 1/2
+            num_bzic = math.floor(int(n * bzic_ratio))
+            num_bshvr = math.floor(int(n * bshvr_ratio))
+
+            bzic = [creator.Individual_BUY(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(num_bzic)]
+            bshvr = [creator.Individual_BUY(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(num_bshvr)]
+
+            loaded_inds = bzic + bshvr
         elif self.job == 'SELL':
-            loaded_inds = [creator.Individual_SELL(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(n)]
+            szic_ratio = 1/2
+            sshvr_ratio = 1/2
+            num_szic = math.floor(int(n * szic_ratio))
+            num_sshvr = math.floor(int(n * sshvr_ratio))
+
+            szic = [creator.Individual_SELL(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(num_szic)]
+            sshvr = [creator.Individual_SELL(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(num_sshvr)]
+            loaded_inds = szic + sshvr
 
         # self.exprs = self.toolbox.population(n)
         self.exprs = loaded_inds
@@ -196,6 +211,12 @@ class STGP_Entity(Entity):
         return map(lambda x: x.fitness.values[0], self.exprs)
 
     def evolve_population(self, time):
+        # orderprices = []
+        # for tr in self.traders.values():
+        #     orderprices.extend(tr.orderprices)
+        # averageop = mean(orderprices)
+        # print(self.lei, averageop)
+        # print(self.lei, orderprices)
 
         if not experiment_setup.evolving:
             print(f'generation: {int(time / self.EVAL_TIME)}')

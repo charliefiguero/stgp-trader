@@ -56,7 +56,7 @@ class STGP_Trader(Trader):
         # Stat tracking
         self.all_gens_data = []
         self.current_gen_data = Generation_Data(tid, self.current_gen)
-
+        self.orderprices = []
     
     def del_cust_order(self, cust_order_id, verbose):
         super().del_cust_order(cust_order_id, verbose)
@@ -182,6 +182,9 @@ class STGP_Trader(Trader):
 
             order = Order(self.tid, self.job, "LIM", quoteprice, 
                           self.orders[0].qty, time, None, -1)
+
+            # print(f"{self.tid}: q={quoteprice}, l={self.limit}, i={improvement}")
+            self.orderprices.append(self.limit)
 
             self.price = quoteprice
             self.lastquote = order
