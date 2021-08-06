@@ -126,7 +126,7 @@ class STGP_Entity(Entity):
         # create toolbox
         toolbox = base.Toolbox()
         # init tools
-        toolbox.register("expr", gp.genFull, pset=pset, min_=1, max_=3)
+        toolbox.register("expr", gp.genHalfAndHalf, pset=pset, min_=1, max_=3)
 
         # another hack for DEAP :(
         if self.job == 'BUY':
@@ -156,24 +156,30 @@ class STGP_Entity(Entity):
 
         # load in prebuilt traders 
         if self.job == 'BUY':
-            bzic_ratio = 1/2
-            bshvr_ratio = 1/2
+            bzic_ratio = 1/3
+            bshvr_ratio = 1/3
+            brand_ratio = 1/3
             num_bzic = math.floor(int(n * bzic_ratio))
             num_bshvr = math.floor(int(n * bshvr_ratio))
+            num_brand = n - num_bzic - num_bshvr
 
             bzic = [creator.Individual_BUY(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(num_bzic)]
             bshvr = [creator.Individual_BUY(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(num_bshvr)]
+            brand = [self.toolbox.individual() for x in range(num_brand)]
 
-            loaded_inds = bzic + bshvr
+            loaded_inds = bzic + bshvr + brand
         elif self.job == 'SELL':
-            szic_ratio = 1/2
-            sshvr_ratio = 1/2
+            szic_ratio = 1/3
+            sshvr_ratio = 1/3
+            srandom_ratio = 1/3
             num_szic = math.floor(int(n * szic_ratio))
             num_sshvr = math.floor(int(n * sshvr_ratio))
+            num_srand = n - num_szic - num_sshvr
 
             szic = [creator.Individual_SELL(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(num_szic)]
             sshvr = [creator.Individual_SELL(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(num_sshvr)]
-            loaded_inds = szic + sshvr
+            srand = [self.toolbox.individual() for x in range(num_sshvr)]
+            loaded_inds = szic + sshvr + srand
 
         # self.exprs = self.toolbox.population(n)
         self.exprs = loaded_inds

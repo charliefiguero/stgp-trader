@@ -484,7 +484,7 @@ def plot_gen_profit(BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHE
 if __name__ == "__main__":
     # plot_stats()
 
-    num_gens = 20
+    num_gens = 50
     duration = 10000
     eq_price = 100
     num_trials = 1
