@@ -28,6 +28,7 @@ class Trader:
         self.lastquote = None  # record of what its most recent quote was/is (incl price)
         self.paramvec = []  # vector of parameter values -- stored separately for switching between strategies
         self.profit_tape = []
+        self.quoteprices = []
 
     def __str__(self):
         blotterstring = '['
@@ -262,6 +263,7 @@ class Trader_Giveaway(Trader):
                           self.orders[0].qty,
                           time, None, -1)
             self.lastquote = order
+            self.quoteprices.append((time, quoteprice, quoteprice))
         return order
 
 
@@ -291,6 +293,7 @@ class Trader_ZIC(Trader):
                 # NB should check it == 'Ask' and barf if not
             order = Order(self.tid, otype, ostyle, oprice, self.orders[0].qty, time, None, -1)
             self.lastquote = order
+            self.quoteprices.append((time, oprice, limit))
         return order
 
 
@@ -327,6 +330,7 @@ class Trader_Shaver(Trader):
                     quoteprice = lob['asks']['worstp']
             order = Order(self.tid, otype, ostyle, quoteprice, self.orders[0].qty, time, None, -1)
             self.lastquote = order
+            self.quoteprices.append((time, quoteprice, limitprice))
         return order
 
 
@@ -439,6 +443,7 @@ class Trader_Sniper(Trader):
                     oprice = lob['asks']['worstp']
             order = Order(self.tid, otype, ostyle, oprice, self.orders[0].qty, time, None, -1)
             self.lastquote = order
+            self.quoteprices.append((time, oprice, limitprice))
         return order
 
 
@@ -493,6 +498,7 @@ class Trader_ZIP(Trader):
 
             order = Order(self.tid, self.job, "LIM", quoteprice, self.orders[0].qty, time, None, -1)
             self.lastquote = order
+            self.quoteprices.append((time, quoteprice, self.limit))
         return order
 
     # update margin on basis of what happened in market

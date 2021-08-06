@@ -1,5 +1,5 @@
 # general
-END_TIME = 10000.0
+END_TIME = 5000.0
 
 # must be atleast 1
 NUM_TRIALS = 10
@@ -16,8 +16,8 @@ NUM_TRIALS = 10
 # BUYERS_SPEC =  [('ZIC', 10)] 
 # SELLERS_SPEC = [('ZIC', 10)] 
 
-BUYERS_SPEC =  [('ZIC', 200)] 
-SELLERS_SPEC = [('ZIC', 200)] 
+BUYERS_SPEC =  [('ZIC', 50)] 
+SELLERS_SPEC = [('ZIC', 50)] 
 
 # BUYERS_SPEC =  [] 
 # SELLERS_SPEC = [] 
@@ -33,9 +33,9 @@ STGP_E_BUY = 1
 STGP_E_SELL = 1
 
 # STGP variables
-NUM_TRADERS_PER_ENTITY = 100
+NUM_TRADERS_PER_ENTITY = 10
 STGP_TRADER_STARTING_BALANCE = 100
-NUM_GENS = 50
+NUM_GENS = 10
 evolving = True
 
 # probability 1 <= p <= 0

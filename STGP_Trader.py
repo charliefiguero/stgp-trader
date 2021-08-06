@@ -57,6 +57,7 @@ class STGP_Trader(Trader):
         self.all_gens_data = []
         self.current_gen_data = Generation_Data(tid, self.current_gen)
         self.orderprices = []
+        self.quoteprices = []
     
     def del_cust_order(self, cust_order_id, verbose):
         super().del_cust_order(cust_order_id, verbose)
@@ -185,6 +186,7 @@ class STGP_Trader(Trader):
 
             # print(f"{self.tid}: q={quoteprice}, l={self.limit}, i={improvement}")
             self.orderprices.append(self.limit)
+            self.quoteprices.append((time, quoteprice, self.limit))
 
             self.price = quoteprice
             self.lastquote = order
