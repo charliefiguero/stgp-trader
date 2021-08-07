@@ -191,8 +191,6 @@ class STGP_Entity(Entity):
         # self.exprs = self.toolbox.population(n)
         self.exprs = loaded_inds
 
-        self.write_to_offspring_file(self.gen)
-
         # self.prv_exprs.append(deepcopy(self.exprs))
 
         for count, expr in enumerate(self.exprs):
@@ -244,6 +242,8 @@ class STGP_Entity(Entity):
                 trader.reset_gen_profits()
             return
 
+        self.gen += 1
+        self.write_to_offspring_file(self.gen, time)
 
         # Normal evolution
 
@@ -306,9 +306,6 @@ class STGP_Entity(Entity):
 
         # The population is entirely replaced by the offspring
         self.exprs[:] = offspring
-
-        self.gen += 1
-        self.write_to_offspring_file(self.gen)
 
         # print(gp.PrimitiveTree(offspring[0]))
 
@@ -388,11 +385,13 @@ class STGP_Entity(Entity):
                 output = gp.PrimitiveTree(tree)
                 pickle.dump(output, outfile)
 
-    def write_to_offspring_file(self, gen):
+    def write_to_offspring_file(self, gen, time):
+        withprofit = [(self.evaluate_expr(expr, time), str(gp.PrimitiveTree(expr))) for expr in self.exprs]
+        withprofit.sort(reverse=True)
         with open(self.offspring_file, 'a') as f:
             f.write(f"Gen: {gen}\n")
-            for e in self.exprs:
-                f.write(str(gp.PrimitiveTree(e)) + '\n')
+            for e in withprofit:
+                f.write(str(e[0]) + ": " + str(e[1]) + '\n')
             f.write("\n")
 
 
