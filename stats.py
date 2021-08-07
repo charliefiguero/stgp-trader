@@ -62,12 +62,14 @@ def plot_gen_profits(gen_profits, title = None):
     output.get_figure().savefig(f'networth_plots/{title}.png')
     # plt.show()
 
-def plot_stats():
-    list_of_files = glob.glob('stgp_csvs/gen_records/*') # * means all if need specific format then *.csv
-    if not list_of_files:
-        raise AssertionError('No gen_records present. Try rerunning the experient.')
+def plot_stats(fname):
+    # list_of_files = glob.glob('stgp_csvs/gen_records/*') # * means all if need specific format then *.csv
+    # if not list_of_files:
+    #     raise AssertionError('No gen_records present. Try rerunning the experient.')
 
-    latest_file = max(list_of_files, key=os.path.getctime)
+    # latest_file = max(list_of_files, key=os.path.getctime)
+
+    latest_file = fname
 
     print(f'reading file: ', latest_file, '\n')
 
@@ -81,41 +83,21 @@ def plot_stats():
     
     # PLOTTING
 
-    # avg
     fig, ax = plt.subplots()
     ax.set_title('Average Profit for STGP_Traders')
     ax.set_xlabel('Generation')
     ax.set_ylabel('Average Trader Profit')
-    sns.set_theme()
-    output = sns.lineplot(x=exp_df['gen_num'], y=exp_df['avg'], ax=ax)
-    output.get_figure().savefig(f'stats_plots/avg/{datetime.now()}.png')
 
-    # std
-    fig, ax = plt.subplots()
-    ax.set_title('Standard Deviation of Profit for STGP_Traders')
-    ax.set_xlabel('Generation')
-    ax.set_ylabel('Standard Deviation')
-    sns.set_theme()
-    output = sns.lineplot(x=exp_df['gen_num'], y=exp_df['std'], ax=ax)
-    output.get_figure().savefig(f'stats_plots/std/{datetime.now()}.png')
+    x = list(map(lambda x: x+1, exp_df['gen_num'].tolist()))
+    yavg = exp_df['avg'].tolist()
+    ymax = exp_df['max'].tolist()
+    err = exp_df['std'].tolist()
+    plt.errorbar(x=x, y=yavg, fmt="ko", linewidth=1, linestyle="-", yerr=err, capsize=1, elinewidth = 0.5)
+    plt.plot(x, ymax, "ro", linewidth=1, linestyle="--")
+    # output.get_figure().savefig(f'stats_plots/avg/{datetime.now()}.png')
 
-    # max
-    fig, ax = plt.subplots()
-    ax.set_title('Max Trader Profit for STGP')
-    ax.set_xlabel('Generation')
-    ax.set_ylabel('Max Trader Profit')
-    sns.set_theme()
-    output = sns.lineplot(x=exp_df['gen_num'], y=exp_df['max'], ax=ax)
-    output.get_figure().savefig(f'stats_plots/max/{datetime.now()}.png')
+    plt.show()
 
-    # min
-    fig, ax = plt.subplots()
-    ax.set_title('Min Trader Profit for STGP')
-    ax.set_xlabel('Generation')
-    ax.set_ylabel('Min Trader Profit')
-    sns.set_theme()
-    output = sns.lineplot(x=exp_df['gen_num'], y=exp_df['avg'], ax=ax)
-    output.get_figure().savefig(f'stats_plots/min/{datetime.now()}.png')
     
 
 def draw_expr(expr, name=None):
@@ -701,35 +683,35 @@ def plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_mean
 if __name__ == "__main__":
     # plot_stats()
 
-    num_gens = 40
-    duration = 10000
-    eq_price = 100
-    num_trials = 1
-    fpath = "standard_csvs/Test00tapes.csv"
-    profit_fpath = "standard_csvs/Test00profit.csv"
+    # num_gens = 40
+    # duration = 10000
+    # eq_price = 100
+    # num_trials = 1
+    # fpath = "standard_csvs/Test00tapes.csv"
+    # profit_fpath = "standard_csvs/Test00profit.csv"
 
-    # single_agent_efficiency(duration, num_gens, eq_price, fpath)
+    # # single_agent_efficiency(duration, num_gens, eq_price, fpath)
 
-    mean_tran_price(duration, num_gens, fpath)
-    BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae = sae(duration, num_gens, eq_price, "standard_csvs/Test00profit.csv")
-    plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae)
+    # mean_tran_price(duration, num_gens, fpath)
+    # BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae = sae(duration, num_gens, eq_price, "standard_csvs/Test00profit.csv")
+    # plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae)
     
 
-    BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit = genprofit(duration, num_gens, eq_price, "standard_csvs/Test00profit.csv") 
-    plot_gen_profit(BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit)
+    # BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit = genprofit(duration, num_gens, eq_price, "standard_csvs/Test00profit.csv") 
+    # plot_gen_profit(BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit)
 
-    BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades = numtrades(duration, num_gens, eq_price, profit_fpath)
-    plot_gen_numtrades(BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades)
+    # BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades = numtrades(duration, num_gens, eq_price, profit_fpath)
+    # plot_gen_numtrades(BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades)
 
-    quote_fpath="standard_csvs/Test00quotes.csv"
-    BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote = quoteprice_analysis(duration, num_gens, quote_fpath)
+    # quote_fpath="standard_csvs/Test00quotes.csv"
+    # BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote = quoteprice_analysis(duration, num_gens, quote_fpath)
 
-    plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote)
+    # plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote)
 
 
         
     # orders_prices()
-    plot_tran_price()
+    # plot_tran_price()
     # blotter_debug()
     # plot_hof()
 
@@ -737,6 +719,9 @@ if __name__ == "__main__":
     # duration = 10000
     # answer = single_agent_efficiency(duration/num_gens)
     # print(answer)
+
+    gpfile = "stgp_csvs/gen_records/2021-08-07 20:24:56.906519S_STGP_ENTITY_0.json"
+    plot_stats(gpfile)
 
 
 

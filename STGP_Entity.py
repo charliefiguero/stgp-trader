@@ -157,10 +157,10 @@ class STGP_Entity(Entity):
 
         # load in prebuilt traders 
         if self.job == 'BUY':
-            bzic_ratio = 1/4
-            bshvr_ratio = 1/4
-            bgvwy_ratio = 1/4
-            brand_ratio = 1/4
+            bzic_ratio = 1
+            bshvr_ratio = 0
+            bgvwy_ratio = 0
+            brand_ratio = 0
             num_bzic = math.floor(int(n * bzic_ratio))
             num_bshvr = math.floor(int(n * bshvr_ratio))
             num_bgvwy = math.floor(int(n * bgvwy_ratio))
@@ -173,10 +173,10 @@ class STGP_Entity(Entity):
 
             loaded_inds = bzic + bshvr + bgvwy + brand
         elif self.job == 'SELL':
-            szic_ratio = 1/4
-            sshvr_ratio = 1/4
-            sgvwy_ratio = 1/4
-            srandom_ratio = 1/4
+            szic_ratio = 1
+            sshvr_ratio = 0
+            sgvwy_ratio = 0
+            srandom_ratio = 0
             num_szic = math.floor(int(n * szic_ratio))
             num_sshvr = math.floor(int(n * sshvr_ratio))
             num_sgvwy = math.floor(int(n * sgvwy_ratio))

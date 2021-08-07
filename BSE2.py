@@ -529,6 +529,11 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
 
     # end of an experiment
 
+    for e in stgp_entities['BUY']: 
+        e.evolve_population(time)
+    for e in stgp_entities['SELL']: 
+        e.evolve_population(time)
+
     # close the prices file
     prices_data_file.close()
 
