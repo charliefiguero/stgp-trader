@@ -622,7 +622,8 @@ class Trader_ZIP(Trader):
                         # could sell for more? raise margin
                         target_price = target_up(tradeprice)
                         profit_alter(target_price)
-                    elif ask_lifted and self.active and not willing_to_trade(tradeprice):
+                    # elif ask_lifted and self.active and not willing_to_trade(tradeprice):
+                    else:
                         # wouldnt have got this deal, still working order, so reduce margin
                         target_price = target_down(tradeprice)
                         profit_alter(target_price)
@@ -631,13 +632,16 @@ class Trader_ZIP(Trader):
                     print("trade is None, how is this possible?")
             else:
                 # no deal: aim for a target price higher than best bid
-                if ask_improved and self.price > lob_best_ask_p:
-                    if lob_best_bid_p is not None:
-                        # target_price = target_up(lob_best_bid_p)
-                        target_price = target_down(lob_best_bid_p)
-                    else:
-                        target_price = lob['asks']['worstp']  # stub quote
+                if lob_best_bid_p is not None:
+                    target_price = target_down(lob_best_bid_p)
                     profit_alter(target_price)
+                # if ask_improved and self.price > lob_best_ask_p:
+                #     if lob_best_bid_p is not None:
+                #         # target_price = target_up(lob_best_bid_p)
+                #         target_price = target_down(lob_best_bid_p)
+                #     else:
+                #         target_price = lob['asks']['worstp']  # stub quote
+                #     profit_alter(target_price)
 
         if self.job == 'Bid':
             # buyer
@@ -648,7 +652,8 @@ class Trader_ZIP(Trader):
                         # could buy for less? raise margin (i.e. cut the price)
                         target_price = target_down(tradeprice)
                         profit_alter(target_price)
-                    elif bid_hit and self.active and not willing_to_trade(tradeprice):
+                    # elif bid_hit and self.active and not willing_to_trade(tradeprice):
+                    else:
                         # wouldnt have got this deal, still working order, so reduce margin
                         target_price = target_up(tradeprice)
                         profit_alter(target_price)
@@ -657,14 +662,18 @@ class Trader_ZIP(Trader):
                     print("trade is None, how is this possible?")
 
             else:
-                # no deal: aim for target price lower than best ask
-                if bid_improved and self.price < lob_best_bid_p:
-                    if lob_best_ask_p is not None:
-                        target_price = target_up(lob_best_ask_p)
-                        # target_price = target_down(lob_best_ask_p)
-                    else:
-                        target_price = lob['bids']['worstp']  # stub quote
+                print(time)
+                if lob_best_ask_p is not None:
+                    target_price = target_up(lob_best_ask_p)
                     profit_alter(target_price)
+                # no deal: aim for target price lower than best ask
+                # if bid_improved and self.price < lob_best_bid_p:
+                #     if lob_best_ask_p is not None:
+                #         target_price = target_up(lob_best_ask_p)
+                #         # target_price = target_down(lob_best_ask_p)
+                #     else:
+                #         target_price = lob['bids']['worstp']  # stub quote
+                #     profit_alter(target_price)
 
         # remember the best LOB data ready for next response
         self.prev_best_bid_p = lob_best_bid_p

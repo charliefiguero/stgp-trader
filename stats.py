@@ -313,17 +313,17 @@ def numtrades(duration: int, num_gens: int, eq_price, filename):
         tid = row[1][1:]
         ttype = row[2]
         num_trades = row[3]
-        print(row[4:])
+        # print(row[4:])
 
-        print('\n\n\n\n\n')
+        # print('\n\n\n\n\n')
         trades = [list(map(float, x[1:].split(' '))) for x in row[4:]]
 
         trader_profit[tid] = {}
 
         gen = 0
-        print(row)
+        # print(row)
         for t in trades:
-            print(t)
+            # print(t)
             time = t[0]
             profit = t[1]
 
@@ -538,11 +538,12 @@ def plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae):
 
     gens_range = range(1, num_gens+1)
     expected_sae = [1]*num_gens
-    ax.plot(gens_range, expected_sae, ":k")
-    ax.plot(gens_range, BSTGP_gen_sae, "-g")
-    ax.plot(gens_range, SSTGP_gen_sae, "-r")
-    ax.plot(gens_range, BOTHER_gen_sae, "--g")
-    ax.plot(gens_range, SOTHER_gen_sae, "--r")
+    ax.plot(gens_range, expected_sae, ":k", label="Expected SAE")
+    ax.plot(gens_range, BSTGP_gen_sae, "-g", label="BSTGP")
+    ax.plot(gens_range, SSTGP_gen_sae, "-r", label="SSTGP")
+    ax.plot(gens_range, BOTHER_gen_sae, "--g", label="BOTHER")
+    ax.plot(gens_range, SOTHER_gen_sae, "--r", label="SOTHER")
+    plt.legend()
     plt.show()
 
 
@@ -564,10 +565,12 @@ def plot_gen_profit(BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHE
     ax.set_title("Mean Generational Profit")
 
     gens_range = range(1, num_gens+1)
-    ax.plot(gens_range, BSTGP_gen_profit, "-g")
-    ax.plot(gens_range, SSTGP_gen_profit, "-r")
-    ax.plot(gens_range, BOTHER_gen_profit, "--g")
-    ax.plot(gens_range, SOTHER_gen_profit, "--r")
+
+    ax.plot(gens_range, BSTGP_gen_profit, "-g", label="BSTGP")
+    ax.plot(gens_range, SSTGP_gen_profit, "-r", label="SSTGP")
+    ax.plot(gens_range, BOTHER_gen_profit, "--g", label="BOTHER")
+    ax.plot(gens_range, SOTHER_gen_profit, "--r", label="SOTHER")
+    plt.legend()
     plt.show()
 
 def plot_gen_numtrades(BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades):
@@ -588,10 +591,12 @@ def plot_gen_numtrades(BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_nu
     ax.set_title("Mean Generational Number of Trades")
 
     gens_range = range(1, num_gens+1)
-    ax.plot(gens_range, BSTGP_gen_num_trades, "-g")
-    ax.plot(gens_range, SSTGP_gen_num_trades, "-r")
-    ax.plot(gens_range, BOTHER_gen_num_trades, "--g")
-    ax.plot(gens_range, SOTHER_gen_num_trades, "--r")
+
+    ax.plot(gens_range, BSTGP_gen_num_trades, "-g", label="BSTGP")
+    ax.plot(gens_range, SSTGP_gen_num_trades, "-r", label="SSTGP")
+    ax.plot(gens_range, BOTHER_gen_num_trades, "--g", label="BOTHER")
+    ax.plot(gens_range, SOTHER_gen_num_trades, "--r", label="SOTHER")
+    plt.legend()
     plt.show()
 
 def quoteprice_analysis(duration, num_gens, filename):
@@ -605,7 +610,7 @@ def quoteprice_analysis(duration, num_gens, filename):
     # 1 trader per row
     for row in reader:
         tid = row[1][1:]
-        print(tid)
+        # print(tid)
         num_trades = row[2]
         quotes = [list(map(float, x[1:].split(' '))) for x in row[3:]]
 
@@ -681,13 +686,14 @@ def plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_mean
         return ax
 
     _, ax = plt.subplots()
-    ax.set_title("Mean Generational Price")
+    ax.set_title("Mean Generational Quote Price")
 
     gens_range = range(1, num_gens+1)
-    ax.plot(gens_range, BSTGP_gen_meanquote, "-g")
-    ax.plot(gens_range, SSTGP_gen_meanquote, "-r")
-    ax.plot(gens_range, BOTHER_gen_meanquote, "--g")
-    ax.plot(gens_range, SOTHER_gen_meanquote, "--r")
+    ax.plot(gens_range, BSTGP_gen_meanquote, "-g", label="BSTGP")
+    ax.plot(gens_range, SSTGP_gen_meanquote, "-r", label="SSTGP")
+    ax.plot(gens_range, BOTHER_gen_meanquote, "--g", label="BOTHER")
+    ax.plot(gens_range, SOTHER_gen_meanquote, "--r", label="SOTHER")
+    plt.legend()
     plt.show()
 
 
@@ -695,8 +701,8 @@ def plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_mean
 if __name__ == "__main__":
     # plot_stats()
 
-    num_gens = 10
-    duration = 5000
+    num_gens = 40
+    duration = 10000
     eq_price = 100
     num_trials = 1
     fpath = "standard_csvs/Test00tapes.csv"

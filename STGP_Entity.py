@@ -20,7 +20,7 @@ import BSE2_sys_consts
 def if_then_else(inputed, output1, output2):
     return output1 if inputed else output2
 
-def protectedDiv(left, right):
+def div(left, right):
     try:
         return left / right
     except ZeroDivisionError:
@@ -85,7 +85,7 @@ class STGP_Entity(Entity):
         pset.addPrimitive(operator.add, [float, float], float)
         pset.addPrimitive(operator.sub, [float, float], float)
         pset.addPrimitive(operator.mul, [float, float], float)
-        pset.addPrimitive(protectedDiv, [float, float], float)
+        pset.addPrimitive(div, [float, float], float)
         # conditional operations 
         pset.addPrimitive(if_then_else, [bool, float, float], float)
         pset.addPrimitive(operator.lt, [float, float], bool)
@@ -153,33 +153,40 @@ class STGP_Entity(Entity):
             traders = json.load(infile)
             shvr = traders['SHVR']
             zic = traders['ZIC']
+            gvwy = traders['GVWY']
 
         # load in prebuilt traders 
         if self.job == 'BUY':
-            bzic_ratio = 1/3
-            bshvr_ratio = 1/3
-            brand_ratio = 1/3
+            bzic_ratio = 1/4
+            bshvr_ratio = 1/4
+            bgvwy_ratio = 1/4
+            brand_ratio = 1/4
             num_bzic = math.floor(int(n * bzic_ratio))
             num_bshvr = math.floor(int(n * bshvr_ratio))
-            num_brand = n - num_bzic - num_bshvr
+            num_bgvwy = math.floor(int(n * bgvwy_ratio))
+            num_brand = n - num_bzic - num_bshvr - num_bgvwy
 
             bzic = [creator.Individual_BUY(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(num_bzic)]
             bshvr = [creator.Individual_BUY(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(num_bshvr)]
+            bgvwy = [creator.Individual_BUY(gp.PrimitiveTree.from_string(gvwy, self.pset)) for x in range(num_bgvwy)]
             brand = [self.toolbox.individual() for x in range(num_brand)]
 
-            loaded_inds = bzic + bshvr + brand
+            loaded_inds = bzic + bshvr + bgvwy + brand
         elif self.job == 'SELL':
-            szic_ratio = 1/3
-            sshvr_ratio = 1/3
-            srandom_ratio = 1/3
+            szic_ratio = 1/4
+            sshvr_ratio = 1/4
+            sgvwy_ratio = 1/4
+            srandom_ratio = 1/4
             num_szic = math.floor(int(n * szic_ratio))
             num_sshvr = math.floor(int(n * sshvr_ratio))
-            num_srand = n - num_szic - num_sshvr
+            num_sgvwy = math.floor(int(n * sgvwy_ratio))
+            num_srand = n - num_szic - num_sshvr - num_sgvwy
 
             szic = [creator.Individual_SELL(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(num_szic)]
             sshvr = [creator.Individual_SELL(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(num_sshvr)]
-            srand = [self.toolbox.individual() for x in range(num_sshvr)]
-            loaded_inds = szic + sshvr + srand
+            sgvwy = [creator.Individual_SELL(gp.PrimitiveTree.from_string(gvwy, self.pset)) for x in range(num_sgvwy)]
+            srand = [self.toolbox.individual() for x in range(num_srand)]
+            loaded_inds = szic + sshvr + sgvwy + srand
 
         # self.exprs = self.toolbox.population(n)
         self.exprs = loaded_inds
@@ -303,7 +310,7 @@ class STGP_Entity(Entity):
         self.gen += 1
         self.write_to_offspring_file(self.gen)
 
-        print(gp.PrimitiveTree(offspring[0]))
+        # print(gp.PrimitiveTree(offspring[0]))
 
         self.update_trader_expr(time)
 
@@ -366,17 +373,17 @@ class STGP_Entity(Entity):
         data["traders_data"] = traders_data
 
         now = datetime.now() 
-        with open('stgp_csvs/improvements/' + str(now) + '.json', 'w') as outfile:
+        with open('stgp_csvs/improvements/' + str(now) + self.lei + '.json', 'w') as outfile:
             outfile.write(jsonpickle.encode(data, indent=4))
 
     def write_gen_records(self):
         now = datetime.now()
-        with open('stgp_csvs/gen_records/' + str(now) + '.json', 'w') as outfile:
+        with open('stgp_csvs/gen_records/' + str(now) + self.lei + '.json', 'w') as outfile:
             outfile.write(jsonpickle.encode(self.gen_records, indent=4))
 
     def write_hof(self):
         now = datetime.now()
-        with open('stgp_csvs/hall_of_fame/' + str(now), 'wb') as outfile:
+        with open('stgp_csvs/hall_of_fame/' + str(now) + self.lei, 'wb') as outfile:
             for tree in self.hall_of_fame:
                 output = gp.PrimitiveTree(tree)
                 pickle.dump(output, outfile)
