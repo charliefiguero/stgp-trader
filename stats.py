@@ -269,7 +269,11 @@ def genprofit(duration: int, num_gens: int, eq_price, filename):
         total_profit = 0
         for tkey in keys:
             total_profit += sum(trader_profit[tkey][gen])
-        return total_profit / len(keys)
+
+        if len(keys) == 0:
+            return 0
+        else:
+            return total_profit / len(keys)
 
     BSTGP_gen_profit  = []
     SSTGP_gen_profit  = []
@@ -350,7 +354,10 @@ def numtrades(duration: int, num_gens: int, eq_price, filename):
         num = 0
         for tkey in keys:
             num += len(trader_profit[tkey][gen])
-        return num / len(keys)
+        if len(keys) == 0:
+            return 0
+        else:
+            return num / len(keys)
 
     BSTGP_gen_num_trades  = []
     SSTGP_gen_num_trades  = []
@@ -490,6 +497,7 @@ def plot_tran_price():
 
     def line_plot(x, y):
         _, ax = plt.subplots()
+        ax.set_title("Transaction Price")
         ax.plot(x, y)
         ax.set_ylim(ymin=0)
         return ax
@@ -502,7 +510,7 @@ def plot_tran_price():
             ax.set_title(title)
         return ax
 
-    with open('Test00tapes.csv', 'r') as infile:
+    with open('standard_csvs/Test00tapes.csv', 'r') as infile:
         reader = csv.reader(infile)
         timeprice = [(row[2], row[3]) for row in reader]
         times = [float(item[0]) for item in timeprice]
@@ -526,13 +534,14 @@ def plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae):
         return ax
 
     _, ax = plt.subplots()
+    ax.set_title("Gen SAE")
 
     gens_range = range(1, num_gens+1)
     expected_sae = [1]*num_gens
     ax.plot(gens_range, expected_sae, ":k")
-    ax.plot(gens_range, BSTGP_gen_sae, "-b")
+    ax.plot(gens_range, BSTGP_gen_sae, "-g")
     ax.plot(gens_range, SSTGP_gen_sae, "-r")
-    ax.plot(gens_range, BOTHER_gen_sae, "--b")
+    ax.plot(gens_range, BOTHER_gen_sae, "--g")
     ax.plot(gens_range, SOTHER_gen_sae, "--r")
     plt.show()
 
@@ -552,11 +561,12 @@ def plot_gen_profit(BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHE
         return ax
 
     _, ax = plt.subplots()
+    ax.set_title("Mean Generational Profit")
 
     gens_range = range(1, num_gens+1)
-    ax.plot(gens_range, BSTGP_gen_profit, "-b")
+    ax.plot(gens_range, BSTGP_gen_profit, "-g")
     ax.plot(gens_range, SSTGP_gen_profit, "-r")
-    ax.plot(gens_range, BOTHER_gen_profit, "--b")
+    ax.plot(gens_range, BOTHER_gen_profit, "--g")
     ax.plot(gens_range, SOTHER_gen_profit, "--r")
     plt.show()
 
@@ -575,11 +585,12 @@ def plot_gen_numtrades(BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_nu
         return ax
 
     _, ax = plt.subplots()
+    ax.set_title("Mean Generational Number of Trades")
 
     gens_range = range(1, num_gens+1)
-    ax.plot(gens_range, BSTGP_gen_num_trades, "-b")
+    ax.plot(gens_range, BSTGP_gen_num_trades, "-g")
     ax.plot(gens_range, SSTGP_gen_num_trades, "-r")
-    ax.plot(gens_range, BOTHER_gen_num_trades, "--b")
+    ax.plot(gens_range, BOTHER_gen_num_trades, "--g")
     ax.plot(gens_range, SOTHER_gen_num_trades, "--r")
     plt.show()
 
@@ -670,11 +681,12 @@ def plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_mean
         return ax
 
     _, ax = plt.subplots()
+    ax.set_title("Mean Generational Price")
 
     gens_range = range(1, num_gens+1)
-    ax.plot(gens_range, BSTGP_gen_meanquote, "-b")
+    ax.plot(gens_range, BSTGP_gen_meanquote, "-g")
     ax.plot(gens_range, SSTGP_gen_meanquote, "-r")
-    ax.plot(gens_range, BOTHER_gen_meanquote, "--b")
+    ax.plot(gens_range, BOTHER_gen_meanquote, "--g")
     ax.plot(gens_range, SOTHER_gen_meanquote, "--r")
     plt.show()
 
@@ -692,26 +704,26 @@ if __name__ == "__main__":
 
     # single_agent_efficiency(duration, num_gens, eq_price, fpath)
 
-    # mean_tran_price(duration, num_gens, fpath)
-    # BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae = sae(duration, num_gens, eq_price, "standard_csvs/Test00profit.csv")
-    # plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae)
+    mean_tran_price(duration, num_gens, fpath)
+    BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae = sae(duration, num_gens, eq_price, "standard_csvs/Test00profit.csv")
+    plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae)
     
 
-    # BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit = genprofit(duration, num_gens, eq_price, "standard_csvs/Test00profit.csv") 
-    # plot_gen_profit(BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit)
+    BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit = genprofit(duration, num_gens, eq_price, "standard_csvs/Test00profit.csv") 
+    plot_gen_profit(BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit)
 
     BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades = numtrades(duration, num_gens, eq_price, profit_fpath)
     plot_gen_numtrades(BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades)
 
-    # quote_fpath="standard_csvs/Test00quotes.csv"
-    # BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote = quoteprice_analysis(duration, num_gens, quote_fpath)
+    quote_fpath="standard_csvs/Test00quotes.csv"
+    BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote = quoteprice_analysis(duration, num_gens, quote_fpath)
 
-    # plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote)
+    plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote)
 
 
         
     # orders_prices()
-    # plot_tran_price()
+    plot_tran_price()
     # blotter_debug()
     # plot_hof()
 

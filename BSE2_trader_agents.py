@@ -633,7 +633,8 @@ class Trader_ZIP(Trader):
                 # no deal: aim for a target price higher than best bid
                 if ask_improved and self.price > lob_best_ask_p:
                     if lob_best_bid_p is not None:
-                        target_price = target_up(lob_best_bid_p)
+                        # target_price = target_up(lob_best_bid_p)
+                        target_price = target_down(lob_best_bid_p)
                     else:
                         target_price = lob['asks']['worstp']  # stub quote
                     profit_alter(target_price)
@@ -659,7 +660,8 @@ class Trader_ZIP(Trader):
                 # no deal: aim for target price lower than best ask
                 if bid_improved and self.price < lob_best_bid_p:
                     if lob_best_ask_p is not None:
-                        target_price = target_down(lob_best_ask_p)
+                        target_price = target_up(lob_best_ask_p)
+                        # target_price = target_down(lob_best_ask_p)
                     else:
                         target_price = lob['bids']['worstp']  # stub quote
                     profit_alter(target_price)

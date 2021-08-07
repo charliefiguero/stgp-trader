@@ -1,5 +1,5 @@
 # general
-END_TIME = 5000.0
+END_TIME = 1000.0
 
 # must be atleast 1
 NUM_TRIALS = 10
@@ -16,8 +16,10 @@ NUM_TRIALS = 10
 # BUYERS_SPEC =  [('ZIC', 10)] 
 # SELLERS_SPEC = [('ZIC', 10)] 
 
-BUYERS_SPEC =  [('ZIC', 50)] 
-SELLERS_SPEC = [('ZIC', 50)] 
+BUYERS_SPEC =  [('ZIP', 50)] 
+SELLERS_SPEC = [('ZIP', 50)] 
+# BUYERS_SPEC =  [('ZIC', 50)] 
+# SELLERS_SPEC = [('ZIC', 50)] 
 
 # BUYERS_SPEC =  [] 
 # SELLERS_SPEC = [] 
@@ -26,7 +28,7 @@ SELLERS_SPEC = [('ZIC', 50)]
 
 
 # STGP Entities
-STGP_THERE = True
+STGP_THERE = False
 
 # only currently possible to have one of each
 STGP_E_BUY = 1

@@ -568,13 +568,15 @@ if __name__ == "__main__":
 
     # range1 = (95, 95, [bronco_schedule_offsetfn, [] ] )
     # range1 = (50, 150)
-    range1 = (50, 100)
-    supply_schedule = [{'from': start_time, 'to': end_time, 'ranges': [range1], 'stepmode': 'random'}]
+    # range1 = (50, 100)
+    range1 = (50, 50)
+    supply_schedule = [{'from': start_time, 'to': end_time, 'ranges': [range1], 'stepmode': 'fixed'}]
 
     # range1 = (105, 105, [bronco_schedule_offsetfn, [] ] )
     # range1 = (50, 150)
-    range2 = (100, 150)
-    demand_schedule = [{'from': start_time, 'to': end_time, 'ranges': [range2], 'stepmode': 'random'}]
+    # range2 = (100, 150)
+    range2 = (150, 150)
+    demand_schedule = [{'from': start_time, 'to': end_time, 'ranges': [range2], 'stepmode': 'fixed'}]
 
     order_sched = {'sup': supply_schedule, 'dem': demand_schedule,
                    'interval': 20,
