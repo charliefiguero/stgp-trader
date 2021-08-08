@@ -62,39 +62,71 @@ def plot_gen_profits(gen_profits, title = None):
     output.get_figure().savefig(f'networth_plots/{title}.png')
     # plt.show()
 
-def plot_stats(fname):
+def plot_stats(bfname, sfname):
     # list_of_files = glob.glob('stgp_csvs/gen_records/*') # * means all if need specific format then *.csv
     # if not list_of_files:
     #     raise AssertionError('No gen_records present. Try rerunning the experient.')
 
     # latest_file = max(list_of_files, key=os.path.getctime)
 
-    latest_file = fname
+    # #####   BUYERS   ########
+    bfile = bfname
 
-    print(f'reading file: ', latest_file, '\n')
+    print(f'reading file: ', bfile, '\n')
 
-    experiment_data = read_pickle(latest_file)
-    exp_df = pd.DataFrame.from_dict(experiment_data)
-    exp_df.insert(0, 'gen_num', exp_df.index.tolist())
-    exp_df['max'] = list(map(lambda x : x[0], exp_df['max']))
-    exp_df['min'] = list(map(lambda x : x[0], exp_df['min']))
+    bexperiment_data = read_pickle(bfile)
+    bexp_df = pd.DataFrame.from_dict(bexperiment_data)
+    bexp_df.insert(0, 'gen_num', bexp_df.index.tolist())
+    bexp_df['max'] = list(map(lambda x : x[0], bexp_df['max']))
+    bexp_df['min'] = list(map(lambda x : x[0], bexp_df['min']))
 
-    print(exp_df)
+    print(bexp_df)
+
+
+    fig, (ax1, ax2) = plt.subplots(1,2)
+
+    x = list(map(lambda x: x+1, bexp_df['gen_num'].tolist()))
+
+    ax1.set_title('Profit for GP Buyers')
+    ax1.set_xlabel('Generation')
+    ax1.set_ylabel('Average Trader Profit')
+
     
-    # PLOTTING
+    yavg = bexp_df['avg'].tolist()
+    ymax = bexp_df['max'].tolist()
+    err = bexp_df['std'].tolist()
+    ax1.errorbar(x=x, y=yavg, fmt="ko", linewidth=1, linestyle="-", yerr=err, capsize=1, elinewidth = 0.5)
+    ax1.plot(x, ymax, "ro", linewidth=1, linestyle="--")
 
-    fig, ax = plt.subplots()
-    ax.set_title('Average Profit for STGP_Traders')
-    ax.set_xlabel('Generation')
-    ax.set_ylabel('Average Trader Profit')
+    
 
-    x = list(map(lambda x: x+1, exp_df['gen_num'].tolist()))
-    yavg = exp_df['avg'].tolist()
-    ymax = exp_df['max'].tolist()
-    err = exp_df['std'].tolist()
-    plt.errorbar(x=x, y=yavg, fmt="ko", linewidth=1, linestyle="-", yerr=err, capsize=1, elinewidth = 0.5)
-    plt.plot(x, ymax, "ro", linewidth=1, linestyle="--")
-    # output.get_figure().savefig(f'stats_plots/avg/{datetime.now()}.png')
+
+    # ########## SELLERS ###########
+
+    sfile = sfname
+
+    print(f'reading file: ', sfile, '\n')
+
+    sexperiment_data = read_pickle(sfile)
+    sexp_df = pd.DataFrame.from_dict(sexperiment_data)
+    sexp_df.insert(0, 'gen_num', sexp_df.index.tolist())
+    sexp_df['max'] = list(map(lambda x : x[0], sexp_df['max']))
+    sexp_df['min'] = list(map(lambda x : x[0], sexp_df['min']))
+
+    print(sexp_df)
+
+    
+    ax2.set_title('Profit for GP Sellers')
+    ax2.set_xlabel('Generation')
+    # ax2.set_ylabel('Average Trader Profit')
+
+    
+    yavg = sexp_df['avg'].tolist()
+    ymax = sexp_df['max'].tolist()
+    err = sexp_df['std'].tolist()
+    ax2.errorbar(x=x, y=yavg, fmt="ko", linewidth=1, linestyle="-", yerr=err, capsize=1, elinewidth = 0.5)
+    ax2.plot(x, ymax, "ro", linewidth=1, linestyle="--")
+
 
     plt.show()
 
@@ -516,15 +548,17 @@ def plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae):
         return ax
 
     _, ax = plt.subplots()
-    ax.set_title("Gen SAE")
+    plt.xlabel("Generation")
+    plt.ylabel("Single Agent Efficiency")
+    ax.set_title("SAE: ZIC vs GP (ZIC Initialisation)")
 
     gens_range = range(1, num_gens+1)
     expected_sae = [1]*num_gens
-    ax.plot(gens_range, expected_sae, ":k", label="Expected SAE")
-    ax.plot(gens_range, BSTGP_gen_sae, "-g", label="BSTGP")
-    ax.plot(gens_range, SSTGP_gen_sae, "-r", label="SSTGP")
-    ax.plot(gens_range, BOTHER_gen_sae, "--g", label="BOTHER")
-    ax.plot(gens_range, SOTHER_gen_sae, "--r", label="SOTHER")
+    ax.plot(gens_range, expected_sae, ":k")
+    ax.plot(gens_range, BSTGP_gen_sae, "-g", label="GP Buyers")
+    ax.plot(gens_range, SSTGP_gen_sae, "-r", label="GP Sellers")
+    ax.plot(gens_range, BOTHER_gen_sae, "--g", label="ZIC Buyers")
+    ax.plot(gens_range, SOTHER_gen_sae, "--r", label="ZIC Sellers")
     plt.legend()
     plt.show()
 
@@ -544,14 +578,16 @@ def plot_gen_profit(BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHE
         return ax
 
     _, ax = plt.subplots()
-    ax.set_title("Mean Generational Profit")
+    ax.set_title("Profit: ZIC vs GP (ZIC Initialisation)")
+    plt.xlabel("Generation")
+    plt.ylabel("Mean Profit")
 
     gens_range = range(1, num_gens+1)
 
-    ax.plot(gens_range, BSTGP_gen_profit, "-g", label="BSTGP")
-    ax.plot(gens_range, SSTGP_gen_profit, "-r", label="SSTGP")
-    ax.plot(gens_range, BOTHER_gen_profit, "--g", label="BOTHER")
-    ax.plot(gens_range, SOTHER_gen_profit, "--r", label="SOTHER")
+    ax.plot(gens_range, BSTGP_gen_profit, "-g", label="GP Buyers")
+    ax.plot(gens_range, SSTGP_gen_profit, "-r", label="GP Sellers")
+    ax.plot(gens_range, BOTHER_gen_profit, "--g", label="ZIC Buyers")
+    ax.plot(gens_range, SOTHER_gen_profit, "--r", label="ZIC Sellers")
     plt.legend()
     plt.show()
 
@@ -570,14 +606,16 @@ def plot_gen_numtrades(BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_nu
         return ax
 
     _, ax = plt.subplots()
-    ax.set_title("Mean Generational Number of Trades")
+    ax.set_title("Number of Trades: ZIC vs GP (ZIC Initialisation)")
+    plt.xlabel("Generation")
+    plt.ylabel("Number of Trades")
 
     gens_range = range(1, num_gens+1)
 
-    ax.plot(gens_range, BSTGP_gen_num_trades, "-g", label="BSTGP")
-    ax.plot(gens_range, SSTGP_gen_num_trades, "-r", label="SSTGP")
-    ax.plot(gens_range, BOTHER_gen_num_trades, "--g", label="BOTHER")
-    ax.plot(gens_range, SOTHER_gen_num_trades, "--r", label="SOTHER")
+    ax.plot(gens_range, BSTGP_gen_num_trades, "-g", label="GP Buyers")
+    ax.plot(gens_range, SSTGP_gen_num_trades, "-r", label="GP Sellers")
+    ax.plot(gens_range, BOTHER_gen_num_trades, "--g", label="ZIC Buyers")
+    ax.plot(gens_range, SOTHER_gen_num_trades, "--r", label="ZIC Sellers")
     plt.legend()
     plt.show()
 
@@ -668,13 +706,15 @@ def plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_mean
         return ax
 
     _, ax = plt.subplots()
-    ax.set_title("Mean Generational Quote Price")
+    ax.set_title("Quote Price: ZIC vs GP (ZIC Initialisation)")
+    plt.xlabel("Generation")
+    plt.ylabel("Quote Price")
 
     gens_range = range(1, num_gens+1)
-    ax.plot(gens_range, BSTGP_gen_meanquote, "-g", label="BSTGP")
-    ax.plot(gens_range, SSTGP_gen_meanquote, "-r", label="SSTGP")
-    ax.plot(gens_range, BOTHER_gen_meanquote, "--g", label="BOTHER")
-    ax.plot(gens_range, SOTHER_gen_meanquote, "--r", label="SOTHER")
+    ax.plot(gens_range, BSTGP_gen_meanquote, "-g", label="GP Buyers")
+    ax.plot(gens_range, SSTGP_gen_meanquote, "-r", label="GP Sellers")
+    ax.plot(gens_range, BOTHER_gen_meanquote, "--g", label="ZIC Buyers")
+    ax.plot(gens_range, SOTHER_gen_meanquote, "--r", label="ZIC Sellers")
     plt.legend()
     plt.show()
 
@@ -719,9 +759,8 @@ if __name__ == "__main__":
     # print(answer)
 
     sgpfile = "stgp_csvs/gen_records/2021-08-07 22:22:17.490915S_STGP_ENTITY_0.json"
-    plot_stats(sgpfile)
     bgpfile = "stgp_csvs/gen_records/2021-08-07 22:22:15.112821B_STGP_ENTITY_0.json"
-    plot_stats(bgpfile)
+    plot_stats(bgpfile, sgpfile)
 
 
 

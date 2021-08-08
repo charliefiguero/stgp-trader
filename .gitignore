@@ -28,6 +28,7 @@ trees/*
 
 second_run/*
 initial_zic_run/*
+zic_vs_zic50/*
 
 stats_plots/avg/*
 stats_plots/std/*
