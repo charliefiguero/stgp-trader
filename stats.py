@@ -757,9 +757,8 @@ if __name__ == "__main__":
     # duration = 10000
     # answer = single_agent_efficiency(duration/num_gens)
     # print(answer)
-
-    sgpfile = "stgp_csvs/gen_records/2021-08-07 22:22:17.490915S_STGP_ENTITY_0.json"
-    bgpfile = "stgp_csvs/gen_records/2021-08-07 22:22:15.112821B_STGP_ENTITY_0.json"
+    sgpfile = "stgp_csvs/gen_records/2021-08-08 16:55:45.565318S_STGP_ENTITY_0.json"
+    bgpfile = "stgp_csvs/gen_records/2021-08-08 16:55:45.117883B_STGP_ENTITY_0.json"
     plot_stats(bgpfile, sgpfile)
 
 
