@@ -1,5 +1,9 @@
 {
     "SHVR": "sub(sub(best_p_same, 1.0), cust_price)",
     "ZIC": "rand",
-    "GVWY": "0.0"
+    "GVWY": "0.0",
+
+    "ZIC_improved": "sub(last_t_price, rand)"
+    "SHVR_improved": "sub(last_t_price, rand)"
+    "GVWY_improved": "sub(last_t_price, rand)"
 }
