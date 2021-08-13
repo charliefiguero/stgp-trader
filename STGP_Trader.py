@@ -91,115 +91,154 @@ class STGP_Trader(Trader):
             self.limit = self.orders[0].price
             self.job = self.orders[0].atype
 
+
             improvement = 0
 
-            # ######## INPUT CLEANING ###########
-            # n.b. take care when writing trader_conversions
 
-            # last transaction price
-            ltp = None
+            # ######## CONNECT PRIMITIVE SET VARIABLES ###########
+            # improvement is always positive and related to customer limit price ...
+            # ... ensuring symmetrical behaviour between BUY and SELL.
+
+
+            # stub price : maximum possible improvement
+            if self.job == "Bid":
+                stub = BSE2_sys_consts.bse_sys_maxprice - self.limit
+            elif self.job == "Ask":
+                stub = self.limit - BSE2_sys_consts.bse_sys_minprice
+            else:
+                raise ValueError("Invalid job type")
+
+
+            # last transaction price : difference between ltp and customer limit price
+            # no boolean 'is present' check as absense is rare and useless primitive will hinder evolution
             if self.last_t_price == None:
                 ltp = BSE2_sys_consts.bse_sys_maxprice
             else:
-                ltp = self.last_t_price
+                if self.job == "Bid":
+                    ltp = self.limit - self.last_t_price
+                elif self.job == "Ask":
+                    ltp = self.last_t_price - self.limit
 
 
-            # best bid and ask prices on orderbook
-            best_p_same = None
-            best_p_opp = None
+            # same present : is an order present on the same side of the order book as the trader?
+            # opposite present : is an order present on the opposite side of the order book as the trader?
+            same_present = True
+            opp_present = True
             if self.job == 'Bid':
-                # same side
-                if lob['bids']['bestp'] == None:
-                    best_p_same = BSE2_sys_consts.bse_sys_minprice
+                if lob['bids']['n'] == 0:
+                    same_present = False
+                if lob['asks']['n'] == 0:
+                    opp_present = False
+            elif self.job == 'Ask':
+                if lob['asks']['n'] == 0:
+                    same_present = False
+                if lob['bids']['n'] == 0:
+                    opp_present = False
+
+
+            # best same: best price on the same side of the order book as the trader
+            # best opp: best price on the other side of the order book
+            if self.job == 'Bid':
+                if lob['bids']['bestp'] == None: 
+                    # no bids present
+                    best_same = stub
                 else:
-                    best_p_same = lob['bids']['bestp']
+                    best_same = self.limit - lob['bids']['bestp']
                 
-                # opposite side
                 if lob['asks']['bestp'] == None:
-                    best_p_opp = -BSE2_sys_consts.bse_sys_maxprice
+                    # stub chosen for both same and opp as unknown how the number will be used. 
+                    best_opp = stub
                 else:
-                    best_p_opp = lob['asks']['bestp']
+                    best_opp = self.limit - lob['asks']['bestp']
 
             elif self.job == 'Ask':
-                # same side
                 if lob['asks']['bestp'] == None:
-                    best_p_same = 2* BSE2_sys_consts.bse_sys_maxprice
+                    best_same = stub
                 else:
-                    best_p_same = lob['asks']['bestp']
+                    best_same = lob['asks']['bestp'] - self.limit
                 
                 # opposite side
                 if lob['bids']['bestp'] == None:
-                    best_p_opp = BSE2_sys_consts.bse_sys_maxprice
+                    best_opp = stub
                 else:
-                    best_p_opp = lob['bids']['bestp']
+                    best_opp = lob['bids']['bestp'] - self.limit
 
             else:
                 raise ValueError('Invalid job type')
 
 
-            # best possible price and worst possible price
-
-            # #### WARNING! THIS IS BIGGEST AND SMALLEST NOT MIN AND MAX!!! #####
-            best_possible = None
-            worst_possible = None
+            # worst same: worst price on the same side of the order book as the trader
+            # worst opp: worst price on the other side of the order book
             if self.job == 'Bid':
-                best_possible = BSE2_sys_consts.bse_sys_maxprice
-                worst_possible = BSE2_sys_consts.bse_sys_minprice
+                if lob['bids']['worstp'] == None: 
+                    # no bids present
+                    worst_same = stub
+                else:
+                    worst_same = self.limit - lob['bids']['worstp']
+                
+                if lob['asks']['worstp'] == None:
+                    # stub chosen for both same and opp as unknown how the number will be used. 
+                    worst_opp = stub
+                else:
+                    worst_opp = self.limit - lob['asks']['worstp']
+
             elif self.job == 'Ask':
-                best_possible = BSE2_sys_consts.bse_sys_maxprice
-                worst_possible = BSE2_sys_consts.bse_sys_minprice
+                if lob['asks']['worstp'] == None:
+                    worst_same = stub
+                else:
+                    worst_same = lob['asks']['worstp'] - self.limit
+                
+                # opposite side
+                if lob['bids']['worstp'] == None:
+                    worst_opp = stub
+                else:
+                    worst_opp = lob['bids']['worstp'] - self.limit
+
             else:
-                raise ValueError('Invalid job')
+                raise ValueError('Invalid job type')
 
 
-            # sample new random number between customer limit and max. 
-            if self.job == 'Ask':
-                rand_num = random.randint(0, BSE2_sys_consts.bse_sys_maxprice - self.limit)
-            else:
-                rand_num = random.randint(0, self.limit)
+            # random : a random improvement between 0 and max improvement.
+            rand = random.randint(0, stub)
 
             
+            # #############################################################
+
+
             # calculate improvement on customer order via STGP function
-            improvement = self.trading_func(ltp, best_p_same, best_p_opp, time, countdown,
-                                 self.limit, best_possible, worst_possible, rand_num)
+            improvement = self.trading_func(stub, ltp, same_present, opp_present, best_same, best_opp,
+                                 worst_same, worst_opp, rand, countdown, time)
+
+            # reset negative improvements to 0
+            if improvement < 0:
+                improvement = 0
+
 
 
             if verbose:
                 print(f"trader: {self.tid}, limit price: {self.limit}, improvement found: {improvement}")
 
-            # print(f"trader: {self.tid}, limit price: {self.limit}, improvement found: {improvement}")
 
-            # buys for less, sells for more
+            # improvement is added to customer asks and subtracted to customer bids - achieving symmetrical behaviour
             if self.job == 'Bid':
                 quoteprice = int(self.limit - improvement)
-
-                # reset negative improvements
                 if quoteprice < BSE2_sys_consts.bse_sys_minprice:
                     quoteprice = BSE2_sys_consts.bse_sys_minprice
-
                 if quoteprice > self.limit:
                     quoteprice = self.limit
 
-                
             elif self.job == 'Ask':
                 quoteprice = int(self.limit + improvement)
-
-                # prevent prices too large to convert float
                 if quoteprice > BSE2_sys_consts.bse_sys_maxprice:
                     quoteprice = BSE2_sys_consts.bse_sys_maxprice
-
                 if quoteprice < self.limit:
                     quoteprice = self.limit
-
-            # print(f"{self.job} lim: {self.limit} imp: {improvement} quote: {quoteprice}")
-
             
 
 
             order = Order(self.tid, self.job, "LIM", quoteprice, 
                           self.orders[0].qty, time, None, -1)
 
-            # print(f"{self.tid}: q={quoteprice}, l={self.limit}, i={improvement}")
             self.orderprices.append(self.limit)
             self.quoteprices.append((time, quoteprice, self.limit))
 

@@ -1,6 +1,5 @@
 {
-    "SSHVR": "sub(sub(best_p_same, 1.0), cust_price)",
-    "BSHVR": "sub(sub(cust_price, 1.0), best_p_same)",
+    "SHVR": "if_then_else(same_present, best_same, stub)",
     "ZIC": "rand",
     "GVWY": "0.0",
 

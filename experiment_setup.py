@@ -1,5 +1,5 @@
 # general
-END_TIME = 2500.0
+END_TIME = 20000.0
 
 # must be atleast 1
 NUM_TRIALS = 1
@@ -40,8 +40,8 @@ STGP_E_SELL = 1
 # NUM_TRADERS_PER_ENTITY = 10
 NUM_TRADERS_PER_ENTITY = 300
 STGP_TRADER_STARTING_BALANCE = 100
-NUM_GENS = 5
-evolving = False
+NUM_GENS = 40
+evolving = True
 
 # probability 1 <= p <= 0
 CXPB = 0.3 # crossover probability

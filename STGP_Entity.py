@@ -70,17 +70,19 @@ class STGP_Entity(Entity):
 
     def create_deap_toolbox_and_pset(self):
         # initialise pset
-        pset = gp.PrimitiveSetTyped("main", [float, float, float, float, float, float, float, float, float], float)
+        pset = gp.PrimitiveSetTyped("main", [float, float, bool, bool, float, float, float, float, float, float, float], float)
         # inputs to the tree
-        pset.renameArguments(ARG0="last_t_price")
-        pset.renameArguments(ARG1="best_p_same") # same orderbook side
-        pset.renameArguments(ARG2="best_p_opp") # opposite orderbook side
-        pset.renameArguments(ARG3="time")
-        pset.renameArguments(ARG4="countdown") # time till end of trading period
-        pset.renameArguments(ARG5="cust_price") # customer limit price
-        pset.renameArguments(ARG6="best_possible") # system min for buy, max for sell
-        pset.renameArguments(ARG7="worst_possible") # system max for buy, min for sell
+        pset.renameArguments(ARG0="stub")
+        pset.renameArguments(ARG1="ltp") # same orderbook side
+        pset.renameArguments(ARG2="same_present") # opposite orderbook side
+        pset.renameArguments(ARG3="opp_present")
+        pset.renameArguments(ARG4="best_same") # time till end of trading period
+        pset.renameArguments(ARG5="best_opp") # customer limit price
+        pset.renameArguments(ARG6="worst_same") # system min for buy, max for sell
+        pset.renameArguments(ARG7="worst_opp") # system max for buy, min for sell
         pset.renameArguments(ARG8="rand")
+        pset.renameArguments(ARG9="countdown")
+        pset.renameArguments(ARG10="time")
         # float operations
         pset.addPrimitive(operator.add, [float, float], float)
         pset.addPrimitive(operator.sub, [float, float], float)
@@ -151,10 +153,7 @@ class STGP_Entity(Entity):
 
         with open('trader_conversions.json', 'r') as infile:
             traders = json.load(infile)
-            if self.job == "BUY":
-                shvr = traders['BSHVR']
-            else:
-                shvr = traders['SSHVR']
+            shvr = traders['SHVR']
             zic = traders['ZIC']
             gvwy = traders['GVWY']
 
