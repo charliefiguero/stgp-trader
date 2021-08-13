@@ -151,9 +151,16 @@ class STGP_Entity(Entity):
 
         with open('trader_conversions.json', 'r') as infile:
             traders = json.load(infile)
-            shvr = traders['SHVR']
+            if self.job == "BUY":
+                shvr = traders['BSHVR']
+            else:
+                shvr = traders['SSHVR']
             zic = traders['ZIC']
             gvwy = traders['GVWY']
+
+            zic_improved = traders["ZIC_improved"]
+            gvwy_improved = traders["GVWY_improved"]
+            shvr_improved = traders["SHVR_improved"]
 
         # load in prebuilt traders 
         if self.job == 'BUY':
@@ -161,32 +168,42 @@ class STGP_Entity(Entity):
             bshvr_ratio = 1/4
             bgvwy_ratio = 1/4
             brand_ratio = 1/4
+            # improved_ratio = 1
             num_bzic = math.floor(int(n * bzic_ratio))
             num_bshvr = math.floor(int(n * bshvr_ratio))
             num_bgvwy = math.floor(int(n * bgvwy_ratio))
             num_brand = n - num_bzic - num_bshvr - num_bgvwy
+            # num_improved = n
 
             bzic = [creator.Individual_BUY(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(num_bzic)]
             bshvr = [creator.Individual_BUY(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(num_bshvr)]
             bgvwy = [creator.Individual_BUY(gp.PrimitiveTree.from_string(gvwy, self.pset)) for x in range(num_bgvwy)]
             brand = [self.toolbox.individual() for x in range(num_brand)]
+            # bimproved = [creator.Individual_BUY(gp.PrimitiveTree.from_string(shvr_improved, self.pset)) for x in range(num_improved)]
 
+            # loaded_inds = bimproved
+            # loaded_inds = bzic + bshvr + bgvwy 
             loaded_inds = bzic + bshvr + bgvwy + brand
         elif self.job == 'SELL':
             szic_ratio = 1/4
             sshvr_ratio = 1/4
             sgvwy_ratio = 1/4
             srandom_ratio = 1/4
+            # improved_ratio = 1
             num_szic = math.floor(int(n * szic_ratio))
             num_sshvr = math.floor(int(n * sshvr_ratio))
             num_sgvwy = math.floor(int(n * sgvwy_ratio))
             num_srand = n - num_szic - num_sshvr - num_sgvwy
+            # num_improved = n
 
             szic = [creator.Individual_SELL(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(num_szic)]
             sshvr = [creator.Individual_SELL(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(num_sshvr)]
             sgvwy = [creator.Individual_SELL(gp.PrimitiveTree.from_string(gvwy, self.pset)) for x in range(num_sgvwy)]
+            # simproved = [creator.Individual_SELL(gp.PrimitiveTree.from_string(shvr_improved, self.pset)) for x in range(num_improved)]
             srand = [self.toolbox.individual() for x in range(num_srand)]
-            loaded_inds = szic + sshvr + sgvwy + srand
+            # loaded_inds = simproved
+            # loaded_inds = szic + sshvr + sgvwy 
+            loaded_inds = szic + sshvr + sgvwy + srand 
 
         # self.exprs = self.toolbox.population(n)
         self.exprs = loaded_inds

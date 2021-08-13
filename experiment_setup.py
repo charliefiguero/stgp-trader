@@ -1,5 +1,5 @@
 # general
-END_TIME = 10000.0
+END_TIME = 20000.0
 
 # must be atleast 1
 NUM_TRIALS = 1
@@ -13,15 +13,15 @@ NUM_TRIALS = 1
 # BUYERS_SPEC =  [('ZIC', 20),('ZIP', 20)] 
 # SELLERS_SPEC = [('ZIC', 20),('ZIP', 20)] 
 
-# BUYERS_SPEC =  [('ZIC', 10)] 
-# SELLERS_SPEC = [('ZIC', 10)] 
+# BUYERS_SPEC =  [('ZIC', 150)] 
+# SELLERS_SPEC = [('ZIC', 150)] 
 
 # BUYERS_SPEC =  [('ZIP', 20)] 
 # SELLERS_SPEC = [('ZIP', 20)] 
 
 
-# BUYERS_SPEC =  [('GVWY', 300)] 
-# SELLERS_SPEC = [('GVWY', 300)] 
+# BUYERS_SPEC =  [('ZIC', 300)] 
+# SELLERS_SPEC = [('ZIC', 300)] 
 
 BUYERS_SPEC =  [] 
 SELLERS_SPEC = [] 

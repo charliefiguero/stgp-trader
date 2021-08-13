@@ -3,8 +3,8 @@
 import csv
 
 if __name__ == '__main__':
-    boffspringf = "experiments/zic_vs_zic50/boffspring0.txt"
-    soffspringf = "experiments/zic_vs_zic50/soffspring0.txt"
+    boffspringf = "experiments/shvr_vs_shvr50/boffspring0.txt"
+    soffspringf = "experiments/shvr_vs_shvr50/soffspring0.txt"
 
     with open(boffspringf, 'r') as infile:
         blines = infile.readlines()

@@ -773,14 +773,14 @@ if __name__ == "__main__":
     # plot_stats()
 
     num_gens = 40
-    duration = 10000
+    duration = 20000
     eq_price = 100
     num_trials = 1
     # fpath = "standard_csvs/Test00tapes.csv"
     # profit_fpath = "standard_csvs/Test00profit.csv"
 
-    fpath = "experiments/zic_vs_zic50/Test00tapes.csv"
-    profit_fpath = "experiments/zic_vs_zic50/Test00profit.csv"
+    fpath = "standard_csvs/Test00tapes.csv"
+    profit_fpath = "standard_csvs/Test00profit.csv"
 
 
     mean_prices = mean_tran_price(duration, num_gens, fpath)
@@ -796,7 +796,7 @@ if __name__ == "__main__":
     BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades = numtrades(duration, num_gens, eq_price, profit_fpath)
     plot_gen_numtrades(BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades, mean_prices)
 
-    quote_fpath="experiments/zic_vs_zic50/Test00quotes.csv"
+    quote_fpath="standard_csvs/Test00quotes.csv"
     BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote = quoteprice_analysis(duration, num_gens, quote_fpath)
 
     plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote, mean_prices, eq_price)

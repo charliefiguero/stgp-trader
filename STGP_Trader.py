@@ -99,12 +99,7 @@ class STGP_Trader(Trader):
             # last transaction price
             ltp = None
             if self.last_t_price == None:
-                if self.job == 'Bid':
-                    ltp = BSE2_sys_consts.bse_sys_minprice
-                elif self.job == 'Ask':
-                    ltp = BSE2_sys_consts.bse_sys_maxprice
-                else:
-                    raise ValueError('Invalid job type')
+                ltp = BSE2_sys_consts.bse_sys_maxprice
             else:
                 ltp = self.last_t_price
 
@@ -121,20 +116,20 @@ class STGP_Trader(Trader):
                 
                 # opposite side
                 if lob['asks']['bestp'] == None:
-                    best_p_opp = BSE2_sys_consts.bse_sys_maxprice
+                    best_p_opp = -BSE2_sys_consts.bse_sys_maxprice
                 else:
                     best_p_opp = lob['asks']['bestp']
 
             elif self.job == 'Ask':
                 # same side
                 if lob['asks']['bestp'] == None:
-                    best_p_same = BSE2_sys_consts.bse_sys_maxprice
+                    best_p_same = 2* BSE2_sys_consts.bse_sys_maxprice
                 else:
                     best_p_same = lob['asks']['bestp']
                 
                 # opposite side
                 if lob['bids']['bestp'] == None:
-                    best_p_opp = BSE2_sys_consts.bse_sys_minprice
+                    best_p_opp = BSE2_sys_consts.bse_sys_maxprice
                 else:
                     best_p_opp = lob['bids']['bestp']
 
@@ -143,20 +138,25 @@ class STGP_Trader(Trader):
 
 
             # best possible price and worst possible price
+
+            # #### WARNING! THIS IS BIGGEST AND SMALLEST NOT MIN AND MAX!!! #####
             best_possible = None
             worst_possible = None
             if self.job == 'Bid':
                 best_possible = BSE2_sys_consts.bse_sys_maxprice
                 worst_possible = BSE2_sys_consts.bse_sys_minprice
             elif self.job == 'Ask':
-                best_possible = BSE2_sys_consts.bse_sys_minprice
-                worst_possible = BSE2_sys_consts.bse_sys_maxprice
+                best_possible = BSE2_sys_consts.bse_sys_maxprice
+                worst_possible = BSE2_sys_consts.bse_sys_minprice
             else:
                 raise ValueError('Invalid job')
 
 
-            # sample new random number between customer limit and max.
-            rand_num = random.randint(0, abs(best_possible - self.limit))
+            # sample new random number between customer limit and max. 
+            if self.job == 'Ask':
+                rand_num = random.randint(0, BSE2_sys_consts.bse_sys_maxprice - self.limit)
+            else:
+                rand_num = random.randint(0, self.limit)
 
             
             # calculate improvement on customer order via STGP function
@@ -164,12 +164,6 @@ class STGP_Trader(Trader):
                                  self.limit, best_possible, worst_possible, rand_num)
 
 
-            # reset negative improvements
-            if improvement < 0:
-                improvement = 0
-            # prevent prices too large to convert float
-            if improvement > BSE2_sys_consts.bse_sys_maxprice:
-                improvement = BSE2_sys_consts.bse_sys_maxprice
             if verbose:
                 print(f"trader: {self.tid}, limit price: {self.limit}, improvement found: {improvement}")
 
@@ -178,8 +172,29 @@ class STGP_Trader(Trader):
             # buys for less, sells for more
             if self.job == 'Bid':
                 quoteprice = int(self.limit - improvement)
+
+                # reset negative improvements
+                if quoteprice < BSE2_sys_consts.bse_sys_minprice:
+                    quoteprice = BSE2_sys_consts.bse_sys_minprice
+
+                if quoteprice > self.limit:
+                    quoteprice = self.limit
+
+                
             elif self.job == 'Ask':
                 quoteprice = int(self.limit + improvement)
+
+                # prevent prices too large to convert float
+                if quoteprice > BSE2_sys_consts.bse_sys_maxprice:
+                    quoteprice = BSE2_sys_consts.bse_sys_maxprice
+
+                if quoteprice < self.limit:
+                    quoteprice = self.limit
+
+            # print(f"{self.job} lim: {self.limit} imp: {improvement} quote: {quoteprice}")
+
+            
+
 
             order = Order(self.tid, self.job, "LIM", quoteprice, 
                           self.orders[0].qty, time, None, -1)

@@ -1,9 +1,10 @@
 {
-    "SHVR": "sub(sub(best_p_same, 1.0), cust_price)",
+    "SSHVR": "sub(sub(best_p_same, 1.0), cust_price)",
+    "BSHVR": "sub(sub(cust_price, 1.0), best_p_same)",
     "ZIC": "rand",
     "GVWY": "0.0",
 
-    "ZIC_improved": "sub(last_t_price, rand)"
-    "SHVR_improved": "sub(last_t_price, rand)"
-    "GVWY_improved": "sub(last_t_price, rand)"
+    "ZIC_improved": "sub(last_t_price, rand)",
+    "SHVR_improved": "sub(sub(best_p_same, sub(best_p_same, add(worst_possible, countdown))), best_p_same)",
+    "GVWY_improved": "add(0.0, best_p_opp)"
 }
