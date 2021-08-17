@@ -220,6 +220,7 @@ def market_session(session_id, starttime, endtime, entities, stgp_entities, trad
         print("dumping quotes")
         for tr in all_traders:
             trader_id = all_traders[tr].tid
+            ttype = all_traders[tr].ttype
             quote_tape = all_traders[tr].quoteprices
             tape_len = len(quote_tape)
             # build csv string for all events in blotter

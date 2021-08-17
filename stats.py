@@ -274,11 +274,12 @@ def genprofit(duration: int, num_gens: int, eq_price, filename):
     # 1 trader per row
     for row in reader:
         tid = row[1][1:]
-        ttype = row[2]
+        ttype = row[2][1:]
         num_trades = row[3]
         trades = [list(map(float, x[1:].split(' '))) for x in row[4:]]
 
         trader_profit[tid] = {}
+        trader_profit[tid]['ttype'] = ttype
 
         gen = 0
         for t in trades:
@@ -292,15 +293,15 @@ def genprofit(duration: int, num_gens: int, eq_price, filename):
             trader_profit[tid][gen].append(profit)
 
         # create generation arrays for generations with no trades
-        if len(trader_profit[tid]) < num_gens:
+        if len(trader_profit[tid]) < num_gens+1:
             while duration > gen * time_per_gen: 
                 gen += 1
                 trader_profit[tid][gen] = []
 
     BSTGP_keys = [x for x in trader_profit.keys() if "BSTGP" in x]
     SSTGP_keys = [x for x in trader_profit.keys() if "SSTGP" in x]
-    BOTHER_keys = [x for x in trader_profit.keys() if "B" in x and x not in BSTGP_keys]
-    SOTHER_keys = [x for x in trader_profit.keys() if "S" in x and x not in SSTGP_keys and x not in BSTGP_keys]
+    BOTHER_keys = [x for x in trader_profit.keys() if "B" in x and x not in BSTGP_keys  and trader_profit[x]['ttype'] == "ZIP"]
+    SOTHER_keys = [x for x in trader_profit.keys() if "S" in x and x not in SSTGP_keys and x not in BSTGP_keys  and trader_profit[x]['ttype'] == "ZIP"]
 
     def group_gen_profit(keys, gen):
         total_profit = 0
@@ -348,7 +349,7 @@ def numtrades(duration: int, num_gens: int, eq_price, filename):
     # 1 trader per row
     for row in reader:
         tid = row[1][1:]
-        ttype = row[2]
+        ttype = row[2][1:]
         num_trades = row[3]
         # print(row[4:])
 
@@ -356,6 +357,7 @@ def numtrades(duration: int, num_gens: int, eq_price, filename):
         trades = [list(map(float, x[1:].split(' '))) for x in row[4:]]
 
         trader_profit[tid] = {}
+        trader_profit[tid]['ttype'] = ttype
 
         gen = 0
         # print(row)
@@ -371,15 +373,15 @@ def numtrades(duration: int, num_gens: int, eq_price, filename):
             trader_profit[tid][gen].append(profit)
 
         # create generation arrays for generations with no trades
-        if len(trader_profit[tid]) < num_gens:
+        if len(trader_profit[tid]) < num_gens+1:
             while duration > gen * time_per_gen: 
                 gen += 1
                 trader_profit[tid][gen] = []
 
     BSTGP_keys = [x for x in trader_profit.keys() if "BSTGP" in x]
     SSTGP_keys = [x for x in trader_profit.keys() if "SSTGP" in x]
-    BOTHER_keys = [x for x in trader_profit.keys() if "B" in x and x not in BSTGP_keys]
-    SOTHER_keys = [x for x in trader_profit.keys() if "S" in x and x not in SSTGP_keys and x not in BSTGP_keys]
+    BOTHER_keys = [x for x in trader_profit.keys() if "B" in x and x not in BSTGP_keys and trader_profit[x]['ttype'] == "ZIP"]
+    SOTHER_keys = [x for x in trader_profit.keys() if "S" in x and x not in SSTGP_keys and x not in BSTGP_keys and trader_profit[x]['ttype'] == "ZIP"]
 
     def group_gen_profit(keys, gen):
         total_profit = 0
@@ -431,11 +433,12 @@ def sae(duration: int, num_gens: int, eq_price, filename):
     # 1 trader per row
     for row in reader:
         tid = row[1][1:]
-        ttype = row[2]
+        ttype = row[2][1:]
         num_trades = row[3]
         trades = [list(map(float, x[1:].split(' '))) for x in row[4:]]
 
         trader_profit[tid] = {}
+        trader_profit[tid]['ttype'] = ttype
 
         gen = 0
         for t in trades:
@@ -456,15 +459,16 @@ def sae(duration: int, num_gens: int, eq_price, filename):
             trader_profit[tid][gen].append((profit, expectedprofit))
 
         # create generation arrays for generations with no trades
-        if len(trader_profit[tid]) < num_gens:
+        if len(trader_profit[tid]) < num_gens + 1: # ttype is a key
             while duration > gen * time_per_gen: 
                 gen += 1
                 trader_profit[tid][gen] = []
 
     BSTGP_keys = [x for x in trader_profit.keys() if "BSTGP" in x]
     SSTGP_keys = [x for x in trader_profit.keys() if "SSTGP" in x]
-    BOTHER_keys = [x for x in trader_profit.keys() if "B" in x and x not in BSTGP_keys]
-    SOTHER_keys = [x for x in trader_profit.keys() if "S" in x and x not in SSTGP_keys and x not in BSTGP_keys]
+    BOTHER_keys = [x for x in trader_profit.keys() if "B" in x and x not in BSTGP_keys and trader_profit[x]['ttype'] == "ZIP"]
+    SOTHER_keys = [x for x in trader_profit.keys() if "S" in x and x not in SSTGP_keys and x not in BSTGP_keys and trader_profit[x]['ttype'] == "ZIP"]
+
 
     def group_gen_sae(keys, gen):
         actualprofits = 0
@@ -573,7 +577,7 @@ def plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae, m
     _, ax = plt.subplots()
     plt.xlabel("Generation")
     plt.ylabel("Single Agent Efficiency")
-    ax.set_title("SAE: GP vs GP")
+    ax.set_title("SAE")
 
     gens_range = range(1, num_gens+1)
     expected_sae = [1]*num_gens
@@ -581,8 +585,8 @@ def plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae, m
     ax.plot(gens_range, BSTGP_gen_sae, "-g", label="GP Buyers")
     ax.plot(gens_range, SSTGP_gen_sae, "-r", label="GP Sellers")
     # ax.plot(gens_range, mean_profits, "-c", linewidth=2.0, label="Mean Price")
-    ax.plot(gens_range, BOTHER_gen_sae, "--g", label="SHVR Buyers")
-    ax.plot(gens_range, SOTHER_gen_sae, "--r", label="SHVR Sellers")
+    ax.plot(gens_range, BOTHER_gen_sae, "--g", label="ZIP Buyers")
+    ax.plot(gens_range, SOTHER_gen_sae, "--r", label="ZIP Sellers")
     plt.legend()
     plt.show()
 
@@ -602,7 +606,7 @@ def plot_gen_profit(BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHE
         return ax
 
     _, ax = plt.subplots()
-    ax.set_title("Profit: GP vs GP")
+    ax.set_title("Profit")
     plt.xlabel("Generation")
     plt.ylabel("Mean Profit")
 
@@ -611,8 +615,8 @@ def plot_gen_profit(BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHE
     ax.plot(gens_range, BSTGP_gen_profit, "-g", label="GP Buyers")
     ax.plot(gens_range, SSTGP_gen_profit, "-r", label="GP Sellers")
     # ax.plot(gens_range, mean_profits, "-c", linewidth=2.0, label="Mean Price")
-    ax.plot(gens_range, BOTHER_gen_profit, "--g", label="SHVR Buyers")
-    ax.plot(gens_range, SOTHER_gen_profit, "--r", label="SHVR Sellers")
+    ax.plot(gens_range, BOTHER_gen_profit, "--g", label="ZIP Buyers")
+    ax.plot(gens_range, SOTHER_gen_profit, "--r", label="ZIP Sellers")
     plt.legend()
     plt.show()
 
@@ -631,7 +635,7 @@ def plot_gen_numtrades(BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_nu
         return ax
 
     _, ax = plt.subplots()
-    ax.set_title("Number of Trades: GP vs GP")
+    ax.set_title("Number of Trades")
     plt.xlabel("Generation")
     plt.ylabel("Number of Trades")
 
@@ -640,8 +644,8 @@ def plot_gen_numtrades(BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_nu
     ax.plot(gens_range, BSTGP_gen_num_trades, "-g", label="GP Buyers")
     ax.plot(gens_range, SSTGP_gen_num_trades, "-r", label="GP Sellers")
     # ax.plot(gens_range, mean_prices, "--c", label="Mean Prices")
-    ax.plot(gens_range, BOTHER_gen_num_trades, "--g", label="SHVR Buyers")
-    ax.plot(gens_range, SOTHER_gen_num_trades, "--r", label="SHVR Sellers")
+    ax.plot(gens_range, BOTHER_gen_num_trades, "--g", label="ZIP Buyers")
+    ax.plot(gens_range, SOTHER_gen_num_trades, "--r", label="ZIP Sellers")
     plt.legend()
     plt.show()
 
@@ -743,8 +747,8 @@ def plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_mean
     ax.plot(gens_range, SSTGP_gen_meanquote, "-r", label="GP Sellers")
     ax.plot(gens_range, eq_prices, ":k", label="Equilibrium")
     ax.plot(gens_range, mean_prices, ":c", label="Mean Price")
-    ax.plot(gens_range, BOTHER_gen_meanquote, "--g", label="ZIC Buyers")
-    ax.plot(gens_range, SOTHER_gen_meanquote, "--r", label="ZIC Sellers")
+    ax.plot(gens_range, BOTHER_gen_meanquote, "--g", label="ZIP Buyers")
+    ax.plot(gens_range, SOTHER_gen_meanquote, "--r", label="ZIP Sellers")
     plt.legend()
     plt.show()
 
@@ -779,27 +783,101 @@ if __name__ == "__main__":
     # fpath = "standard_csvs/Test00tapes.csv"
     # profit_fpath = "standard_csvs/Test00profit.csv"
 
-    fpath = "standard_csvs/Test00tapes.csv"
-    profit_fpath = "standard_csvs/Test00profit.csv"
+    # fpath = "experiments/competitive/Test00tapes.csv"
+    # profit_fpath = "experiments/competitive/Test00profit.csv"
 
 
-    mean_prices = mean_tran_price(duration, num_gens, fpath)
-    plot_gen_mean_price(mean_prices, eq_price)
+    # mean_prices = mean_tran_price(duration, num_gens, fpath)
+    # # plot_gen_mean_price(mean_prices, eq_price)
 
-    BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae = sae(duration, num_gens, eq_price, profit_fpath)
-    plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae, mean_prices)
+    # BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae = sae(duration, num_gens, eq_price, profit_fpath)
+    # plot_gen_sae(BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae, mean_prices)
+    
+    # BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit = genprofit(duration, num_gens, eq_price, profit_fpath) 
+    # plot_gen_profit(BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit, mean_prices)
+
+    # BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades = numtrades(duration, num_gens, eq_price, profit_fpath)
+    # plot_gen_numtrades(BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades, mean_prices)
+
+    # quote_fpath="experiments/competitive/Test00quotes.csv"
+    # BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote = quoteprice_analysis(duration, num_gens, quote_fpath)
+
+    # plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote, mean_prices, eq_price)
+
+    # sgpfile = "experiments/competitive/2021-08-15 23:02:07.733364S_STGP_ENTITY_0.json"
+    # bgpfile = "experiments/competitive/2021-08-15 23:02:02.999317B_STGP_ENTITY_0.json"
+    # plot_stats(bgpfile, sgpfile)
+
+    # exit()
+
+
+
+    # compiling mean difference between gp and zip sae each generation
+
+    bsae_diff = {}
+    ssae_diff = {}
+
+
+    for i in range(10):
+
+        print(f"Session: {i}")
+
+        path = "experiments/gp300random/"
+        fname = path+f"Test{i:02}profit.csv"
+        # fname = path+f"Test{4:02}profit.csv"
+
+        BSTGP_gen_sae, SSTGP_gen_sae, BOTHER_gen_sae, SOTHER_gen_sae = sae(duration, num_gens, eq_price, fname)
+
+        for i in range(num_gens):
+            gen = i+1
+
+            bdiff = BSTGP_gen_sae[i]
+            # bdiff = BSTGP_gen_sae[i] - BOTHER_gen_sae[i]
+            if gen in bsae_diff:
+                bsae_diff[gen] += bdiff
+            else:
+                bsae_diff[gen] = bdiff
+
+
+            sdiff = SSTGP_gen_sae[i]
+            # sdiff = SSTGP_gen_sae[i] - SOTHER_gen_sae[i]
+            if gen in ssae_diff:
+                ssae_diff[gen] += sdiff
+            else:
+                ssae_diff[gen] = sdiff
+
     
 
-    BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit = genprofit(duration, num_gens, eq_price, profit_fpath) 
-    plot_gen_profit(BSTGP_gen_profit, SSTGP_gen_profit, BOTHER_gen_profit, SOTHER_gen_profit, mean_prices)
+    # 10 for the number of trials
+    bsae_diff = list(map(lambda x: x/(10), bsae_diff.values()))
+    ssae_diff = list(map(lambda x: x/(10), ssae_diff.values()))
 
-    BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades = numtrades(duration, num_gens, eq_price, profit_fpath)
-    plot_gen_numtrades(BSTGP_gen_num_trades, SSTGP_gen_num_trades, BOTHER_gen_num_trades, SOTHER_gen_num_trades, mean_prices)
 
-    quote_fpath="standard_csvs/Test00quotes.csv"
-    BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote = quoteprice_analysis(duration, num_gens, quote_fpath)
+    _, ax = plt.subplots()
+    ax.set_title("Average SAE Difference")
+    plt.xlabel("Generation")
+    plt.ylabel("SAE")
 
-    plot_gen_meanquote(BSTGP_gen_meanquote, SSTGP_gen_meanquote, BOTHER_gen_meanquote, SOTHER_gen_meanquote, mean_prices, eq_price)
+    gens_range = range(1, num_gens+1)
+    eq_prices = [0] * len(gens_range)
+
+    ax.plot(gens_range, bsae_diff, "-g", label="Buyers")
+    ax.plot(gens_range, ssae_diff, "-r", label="Sellers")
+    # ax.plot(gens_range, eq_prices, ":k", label="Equilibrium")
+    plt.legend()
+    plt.show()
+
+
+    # by = list(map(lambda x: x/10, bgenerational_bins.values()))
+    # bm, bc = np.polyfit(gens_range, by, 1)
+    # print(f"buy: m={bm}, c={bc}")
+
+    # # sell side
+    # sy = list(map(lambda x: x/10, sgenerational_bins.values()))
+    # sm, sc = np.polyfit(gens_range, sy, 1)
+    # print(f"buy: m={sm}, c={sc}")
+
+
 
 
         
@@ -814,11 +892,10 @@ if __name__ == "__main__":
     # print(answer)
 
     
+
     
     
-    sgpfile = "stgp_csvs/gen_records/2021-08-08 22:39:08.811182S_STGP_ENTITY_0.json"
-    bgpfile = "stgp_csvs/gen_records/2021-08-08 22:38:51.057676B_STGP_ENTITY_0.json"
-    plot_stats(bgpfile, sgpfile)
+
 
 
 

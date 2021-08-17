@@ -4,8 +4,8 @@ END_TIME = 20000.0
 # must be atleast 1
 NUM_TRIALS = 1
 
-# BUYERS_SPEC = [('ZIP', 50),('ZIC', 50),('GVWY', 50),('SHVR', 50)] 
-# SELLERS_SPEC = [('ZIP', 50),('ZIC', 50),('GVWY', 50),('SHVR', 50)] 
+BUYERS_SPEC = [('ZIP', 200),('ZIC', 25),('GVWY', 25),('SHVR', 50)] 
+SELLERS_SPEC = [('ZIP', 200),('ZIC', 25),('GVWY', 25),('SHVR', 50)] 
 
 # BUYERS_SPEC = [('ZIP', 20),('ZIC', 20),('GVWY', 20),('SHVR', 20)] 
 # SELLERS_SPEC = [('ZIP', 20),('ZIC', 20),('GVWY', 20),('SHVR', 20)] 
@@ -23,8 +23,8 @@ NUM_TRIALS = 1
 # BUYERS_SPEC =  [('ZIC', 300)] 
 # SELLERS_SPEC = [('ZIC', 300)] 
 
-BUYERS_SPEC =  [] 
-SELLERS_SPEC = [] 
+# BUYERS_SPEC =  [] 
+# SELLERS_SPEC = [] 
 
  
 
@@ -38,7 +38,7 @@ STGP_E_SELL = 1
 
 # STGP variables
 # NUM_TRADERS_PER_ENTITY = 10
-NUM_TRADERS_PER_ENTITY = 300
+NUM_TRADERS_PER_ENTITY = 50
 STGP_TRADER_STARTING_BALANCE = 100
 NUM_GENS = 40
 evolving = True

@@ -1,5 +1,5 @@
 {
-    "SHVR": "if_then_else(same_present, best_same, stub)",
+    "SHVR": "if_then_else(same_present, sub(best_same, 1.0), stub)",
     "ZIC": "rand",
     "GVWY": "0.0",
 
