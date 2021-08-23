@@ -106,6 +106,9 @@ if __name__ == "__main__":
     # sell side
     sgenerational_bins = {}
 
+    bother_bins = {}
+    sother_bins = {}
+
     # _, (ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8, ax9) = plt.subplots(3,3)
 
     x=0
@@ -114,7 +117,7 @@ if __name__ == "__main__":
         print(f"Session: {i}")
 
 
-        path = "experiments/competitive/"
+        path = "experiments/comp_newzip/"
         fname = path+f"Test{i:02}profit.csv"
 
         bgp, sgp, bother, sother = genprofit(duration, numgens, fname)
@@ -144,20 +147,30 @@ if __name__ == "__main__":
             else:
                 sgenerational_bins[gen] = sgp[gen-1]
 
-        _, (ax1, ax2) = plt.subplots(1,2)
-        ax1.set_title("Buy Side")
-        ax1.set(xlabel="Generation", ylabel="Profit")
-        ax2.set_title("Sell Side")
-        ax2.set(xlabel="Generation")
+            if gen in bother_bins:
+                bother_bins[gen] += bother[gen-1]
+            else:
+                bother_bins[gen] = bother[gen-1]
 
-        ax1.plot(gens_range, bgp, '-g', label="Buyers")
-        ax2.plot(gens_range, sgp, '-r', label="Seller")
-        ax1.plot(gens_range, bother, '--g', label="Other Buyers")
-        ax2.plot(gens_range, sother, '--r', label="Other Sellers")
+            if gen in sother_bins:
+                sother_bins[gen] += sother[gen-1]
+            else:
+                sother_bins[gen] = sother[gen-1]
+
+        # _, (ax1, ax2) = plt.subplots(1,2)
+        # ax1.set_title("Buy Side")
+        # ax1.set(xlabel="Generation", ylabel="Profit")
+        # ax2.set_title("Sell Side")
+        # ax2.set(xlabel="Generation")
+
+        # ax1.plot(gens_range, bgp, '-g', label="Buyers")
+        # ax2.plot(gens_range, sgp, '-r', label="Seller")
+        # ax1.plot(gens_range, bother, '--g', label="Other Buyers")
+        # ax2.plot(gens_range, sother, '--r', label="Other Sellers")
 
         # ax1.plot(gens_range, gens_range*bm + bc, '--g', label="Buyers: Fitted")
         # ax2.plot(gens_range, gens_range*sm + sc, '--r', label="Sellers: Fitted")
-        plt.show()
+        # plt.show()
 
 
         
@@ -168,24 +181,47 @@ if __name__ == "__main__":
 
     # # buy side
     by = list(map(lambda x: x/10, bgenerational_bins.values()))
-    bm, bc = np.polyfit(gens_range, by, 1)
-    print(f"buy: m={bm}, c={bc}")
+    # bm, bc = np.polyfit(gens_range, by, 1)
+    # print(f"buy: m={bm}, c={bc}")
 
-    # sell side
+    # # sell side
     sy = list(map(lambda x: x/10, sgenerational_bins.values()))
-    sm, sc = np.polyfit(gens_range, sy, 1)
-    print(f"buy: m={sm}, c={sc}")
+    # sm, sc = np.polyfit(gens_range, sy, 1)
+    # print(f"buy: m={sm}, c={sc}")
 
-    _, (ax1, ax2) = plt.subplots(1,2)
-    ax1.plot(gens_range, gens_range*bm + bc, '--g')
-    ax2.plot(gens_range, gens_range*sm + sc, '--r')
+    # # bother side
+    bothery = list(map(lambda x: x/10, bother_bins.values()))
+    # sm, sc = np.polyfit(gens_range, sy, 1)
+    # print(f"buy: m={sm}, c={sc}")
+
+    # # sother side
+    sothery = list(map(lambda x: x/10, sother_bins.values()))
+    # sm, sc = np.polyfit(gens_range, sy, 1)
+    # print(f"buy: m={sm}, c={sc}")
+
+    _, ax = plt.subplots()
+    # _, (ax1, ax2) = plt.subplots(1,2)
+    # ax1.plot(gens_range, gens_range*bm + bc, '-g')
+    # ax2.plot(gens_range, gens_range*sm + sc, '-r')
+    # ax2.plot(gens_range, gens_range*sm + sc, '--r')
+    # ax2.plot(gens_range, gens_range*sm + sc, '--r')
+    # ax1.plot(gens_range, gens_range*bm + bc, '-g')
+    # ax2.plot(gens_range, gens_range*sm + sc, '-r')
+    # ax2.plot(gens_range, gens_range*sm + sc, '--r')
+    # ax2.plot(gens_range, gens_range*sm + sc, '--r')
 
     # ax1.plot(gens_range, gens_range*bm + bc, '--g')
     # ax2.plot(gens_range, gens_range*sm + sc, '--r')
 
-    # plotline(ax1, gens_range, bgp)
+    # plotline(ax1, gens_range, bgenerational_bins, '-g')
+    # plotline(ax1, gens_range, sgenerational_bins, '-r')
+    # plotline(ax1, gens_range, bother_bins, '--g')
+    # plotline(ax1, gens_range, sother_bins, '--r')
 
-
+    ax.plot(gens_range, by, '-g')
+    ax.plot(gens_range, sy, '-r')
+    ax.plot(gens_range, bothery, '--g')
+    ax.plot(gens_range, sothery, '--r')
 
 
 

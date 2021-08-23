@@ -3,7 +3,7 @@
     "ZIC": "rand",
     "GVWY": "0.0",
 
-    "ZIC_improved": "sub(last_t_price, rand)",
-    "SHVR_improved": "sub(sub(best_p_same, sub(best_p_same, add(worst_possible, countdown))), best_p_same)",
-    "GVWY_improved": "add(0.0, best_p_opp)"
+    "ZIC_improved": "best_same",
+    "SHVR_improved": "if_then_else(same_present, rand, add(div(rand, best_opp), if_then_else(lt(time, worst_opp), if_then_else(same_present, worst_opp, ltp), if_then_else(True, rand, ltp))))",
+    "GVWY_improved": "sub(worst_same, best_opp)"
 }

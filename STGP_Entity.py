@@ -163,46 +163,55 @@ class STGP_Entity(Entity):
 
         # load in prebuilt traders 
         if self.job == 'BUY':
-            bzic_ratio = 1/4
-            bshvr_ratio = 1/4
-            bgvwy_ratio = 1/4
-            brand_ratio = 1/4
-            # improved_ratio = 1
+            bzic_ratio = 0
+            bshvr_ratio = 0
+            bgvwy_ratio = 1
+            brand_ratio = 0
+            improved_ratio = 1
             num_bzic = math.floor(int(n * bzic_ratio))
             num_bshvr = math.floor(int(n * bshvr_ratio))
             num_bgvwy = math.floor(int(n * bgvwy_ratio))
             num_brand = n - num_bzic - num_bshvr - num_bgvwy
-            # num_improved = n
+            num_improved = n
 
             bzic = [creator.Individual_BUY(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(num_bzic)]
             bshvr = [creator.Individual_BUY(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(num_bshvr)]
             bgvwy = [creator.Individual_BUY(gp.PrimitiveTree.from_string(gvwy, self.pset)) for x in range(num_bgvwy)]
             brand = [self.toolbox.individual() for x in range(num_brand)]
-            # bimproved = [creator.Individual_BUY(gp.PrimitiveTree.from_string(shvr_improved, self.pset)) for x in range(num_improved)]
+            bimproved = [creator.Individual_BUY(gp.PrimitiveTree.from_string(gvwy_improved, self.pset)) for x in range(num_improved)]
 
-            # loaded_inds = bimproved
+            loaded_inds = bimproved
             # loaded_inds = bzic + bshvr + bgvwy 
-            loaded_inds = bzic + bshvr + bgvwy + brand
+            # loaded_inds = bzic + bshvr + bgvwy + brand
+            # loaded_inds = bzic 
+            # loaded_inds = bshvr 
+            # loaded_inds = bgvwy
+            # loaded_inds = bgvwy
         elif self.job == 'SELL':
-            szic_ratio = 1/4
-            sshvr_ratio = 1/4
-            sgvwy_ratio = 1/4
-            srandom_ratio = 1/4
-            # improved_ratio = 1
+            szic_ratio = 0
+            sshvr_ratio = 0
+            sgvwy_ratio = 1
+            srandom_ratio = 0
+            improved_ratio = 1
             num_szic = math.floor(int(n * szic_ratio))
             num_sshvr = math.floor(int(n * sshvr_ratio))
             num_sgvwy = math.floor(int(n * sgvwy_ratio))
             num_srand = n - num_szic - num_sshvr - num_sgvwy
-            # num_improved = n
+            num_improved = n
 
             szic = [creator.Individual_SELL(gp.PrimitiveTree.from_string(zic, self.pset)) for x in range(num_szic)]
             sshvr = [creator.Individual_SELL(gp.PrimitiveTree.from_string(shvr, self.pset)) for x in range(num_sshvr)]
             sgvwy = [creator.Individual_SELL(gp.PrimitiveTree.from_string(gvwy, self.pset)) for x in range(num_sgvwy)]
-            # simproved = [creator.Individual_SELL(gp.PrimitiveTree.from_string(shvr_improved, self.pset)) for x in range(num_improved)]
+            simproved = [creator.Individual_SELL(gp.PrimitiveTree.from_string(gvwy_improved, self.pset)) for x in range(num_improved)]
             srand = [self.toolbox.individual() for x in range(num_srand)]
-            # loaded_inds = simproved
+
+
+            loaded_inds = simproved
             # loaded_inds = szic + sshvr + sgvwy 
-            loaded_inds = szic + sshvr + sgvwy + srand 
+            # loaded_inds = szic + sshvr + sgvwy + srand 
+            # loaded_inds = szic
+            # loaded_inds = sshvr
+            # loaded_inds = sgvwy
 
         # self.exprs = self.toolbox.population(n)
         self.exprs = loaded_inds
@@ -402,12 +411,12 @@ class STGP_Entity(Entity):
                 pickle.dump(output, outfile)
 
     def write_to_offspring_file(self, gen, time):
-        withprofit = [(self.evaluate_expr(expr, time), str(gp.PrimitiveTree(expr))) for expr in self.exprs]
+        withprofit = [(self.evaluate_expr(expr, time), str(gp.PrimitiveTree(expr)), expr.trader_id) for expr in self.exprs]
         withprofit.sort(reverse=True)
         with open(self.offspring_file, 'a') as f:
             f.write(f"Gen: {gen}\n")
             for e in withprofit:
-                f.write(str(e[0]) + ": " + str(e[1]) + '\n')
+                f.write(str(e[0]) + ": " + e[2] + " : " + str(e[1]) + '\n')
             f.write("\n")
 
 

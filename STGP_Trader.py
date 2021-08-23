@@ -77,6 +77,7 @@ class STGP_Trader(Trader):
         self.all_gens_data.append(self.current_gen_data)
         self.current_gen_data = Generation_Data(self.tid, self.current_gen)
 
+
     def _update_ema(self, price):
         """ Update exponential moving average indicator for the trader. """
         if self.ema == None: self.ema = price
@@ -125,14 +126,14 @@ class STGP_Trader(Trader):
             same_present = True
             opp_present = True
             if self.job == 'Bid':
-                if lob['bids']['n'] == 0:
+                if lob['bids']['bestp'] == None:
                     same_present = False
-                if lob['asks']['n'] == 0:
+                if lob['asks']['bestp'] == None:
                     opp_present = False
             elif self.job == 'Ask':
-                if lob['asks']['n'] == 0:
+                if lob['asks']['bestp'] == None:
                     same_present = False
-                if lob['bids']['n'] == 0:
+                if lob['bids']['bestp'] == None:
                     opp_present = False
 
 
@@ -217,6 +218,10 @@ class STGP_Trader(Trader):
 
             if verbose:
                 print(f"trader: {self.tid}, limit price: {self.limit}, improvement found: {improvement}")
+
+
+
+            # print(f"trader: {self.tid}, expr:{self.trading_func}, limit price: {self.limit}, improvement found: {improvement}")
 
 
             # improvement is added to customer asks and subtracted to customer bids - achieving symmetrical behaviour

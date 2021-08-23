@@ -3,8 +3,11 @@
 import csv
 
 if __name__ == '__main__':
-    boffspringf = "experiments/shvr_vs_shvr50/boffspring0.txt"
-    soffspringf = "experiments/shvr_vs_shvr50/soffspring0.txt"
+    # boffspringf = "experiments/zic_evol/boffspring0.txt"
+    # soffspringf = "experiments/zic_evol/soffspring0.txt"
+
+    boffspringf = "experiments/gvwy_evol/boffspring0.txt"
+    soffspringf = "experiments/gvwy_evol/soffspring0.txt"
 
     with open(boffspringf, 'r') as infile:
         blines = infile.readlines()
@@ -27,7 +30,7 @@ if __name__ == '__main__':
 
         try:
             profit = float(parts[0])
-            expr = parts[1][1:]
+            expr = parts[2][1:]
             
             if profit > max:
                 max = profit
@@ -47,7 +50,7 @@ if __name__ == '__main__':
 
         try:
             profit = float(parts[0])
-            expr = parts[1][1:]
+            expr = parts[2][1:]
             
             if profit > max:
                 max = profit
